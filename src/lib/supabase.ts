@@ -6,11 +6,33 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Supabase URL or Anonymous Key not provided');
-}
+// Create a mock supabase client if credentials are missing
+const createSupabaseClient = () => {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.warn('Supabase URL or Anonymous Key not provided. Using mock client.');
+    
+    // Return a mock client that doesn't throw errors but logs operations
+    return {
+      from: () => ({
+        select: () => ({
+          eq: () => ({
+            maybeSingle: async () => ({ data: null, error: null }),
+          }),
+        }),
+        update: () => ({
+          eq: async () => ({ error: null }),
+        }),
+        insert: async () => ({ error: null }),
+      }),
+      // Add other methods as needed
+    };
+  }
+  
+  // Return real client when credentials are available
+  return createClient(supabaseUrl, supabaseAnonKey);
+};
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createSupabaseClient();
 
 // Types for our Supabase tables
 export type QuestionnaireEntry = {
@@ -26,6 +48,12 @@ export type QuestionnaireEntry = {
 
 export async function saveQuestionnaireData(data: Partial<QuestionnaireEntry>): Promise<void> {
   try {
+    // If we're using the mock client, just log the operation
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.log('Mock saving questionnaire data:', data);
+      return;
+    }
+    
     // Get existing entry if any (based on user_id if available)
     let existingEntry = null;
     
