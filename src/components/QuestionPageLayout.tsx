@@ -28,10 +28,9 @@ const QuestionPageLayout: React.FC<QuestionPageLayoutProps> = ({
     if (isLastPage) {
       try {
         console.log('This is the last page, submitting questionnaire...');
-        await submitQuestionnaire();
+        // The submission is already handled in the ContactInfoPage component
       } catch (error) {
         console.error('Error submitting questionnaire:', error);
-        // Continue anyway, error handling is in the submitQuestionnaire function
       }
     } else {
       nextPage();
