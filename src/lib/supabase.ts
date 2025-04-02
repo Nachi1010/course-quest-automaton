@@ -11,7 +11,7 @@ export type QuestionnaireEntry = {
   is_submitted: boolean;
   created_at?: string;
   updated_at?: string;
-  user_id?: string;
+  user_id: string; // Changed from optional to required to match Supabase schema
 };
 
 export async function saveQuestionnaireData(data: Partial<QuestionnaireEntry>): Promise<void> {
@@ -38,6 +38,12 @@ export async function saveQuestionnaireData(data: Partial<QuestionnaireEntry>): 
       throw new Error('Page number is required');
     }
 
+    // Make sure user_id is always set
+    if (!data.user_id) {
+      console.error('User ID is required');
+      throw new Error('User ID is required');
+    }
+
     if (existingEntry) {
       // Update existing entry
       // We don't include id in the update data
@@ -62,7 +68,8 @@ export async function saveQuestionnaireData(data: Partial<QuestionnaireEntry>): 
         ...data,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        page: data.page // Ensure page is explicitly set for the insert
+        page: data.page, // Ensure page is explicitly set for the insert
+        user_id: data.user_id // Ensure user_id is explicitly set for the insert
       };
       
       // Remove any undefined id when inserting
