@@ -9,6 +9,7 @@ import LandingPage from "./pages/LandingPage";
 import ProfessionalQuestionsPage from "./pages/ProfessionalQuestionsPage";
 import PersonalQuestionsPage from "./pages/PersonalQuestionsPage";
 import ValueAddQuestionsPage from "./pages/ValueAddQuestionsPage";
+import ContactInfoPage from "./pages/ContactInfoPage"; // New contact info page
 import ThankYouPage from "./pages/ThankYouPage";
 import NotFound from "./pages/NotFound";
 
@@ -32,6 +33,7 @@ const App = () => (
                 <Route path="/questionnaire/1" element={<ProfessionalQuestionsPage />} />
                 <Route path="/questionnaire/2" element={<PersonalQuestionsPage />} />
                 <Route path="/questionnaire/3" element={<ValueAddQuestionsPage />} />
+                <Route path="/questionnaire/4" element={<ContactInfoPage />} />
                 <Route path="/thank-you" element={<ThankYouPage />} />
               </Routes>
             </QuestionnaireProvider>

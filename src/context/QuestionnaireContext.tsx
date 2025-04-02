@@ -1,8 +1,9 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { saveQuestionnaireData, QuestionnaireEntry } from '@/lib/supabase';
+import { saveQuestionnaireData, checkUserExists, QuestionnaireEntry } from '@/lib/supabase';
 import { useToast } from '@/components/ui/use-toast';
+import { v4 as uuidv4 } from 'uuid';
 
 type QuestionnaireContextType = {
   answers: Record<string, any>;
@@ -16,6 +17,7 @@ type QuestionnaireContextType = {
   prevPage: () => void;
   submitQuestionnaire: () => Promise<void>;
   setUserId: (id: string | null) => void;
+  totalPages: number;
 };
 
 const QuestionnaireContext = createContext<QuestionnaireContextType | undefined>(undefined);
@@ -36,8 +38,9 @@ export const QuestionnaireProvider: React.FC<{ children: React.ReactNode }> = ({
   const [userId, setUserId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const totalPages = 4; // Now we have 4 pages including the contact page
 
-  // Load saved data from localStorage on initial load
+  // Generate or load user ID on initial load
   useEffect(() => {
     const savedData = localStorage.getItem('questionnaire_data');
     if (savedData) {
@@ -45,20 +48,32 @@ export const QuestionnaireProvider: React.FC<{ children: React.ReactNode }> = ({
         const parsedData = JSON.parse(savedData);
         if (parsedData.answers) setAnswers(parsedData.answers);
         if (parsedData.contactInfo) setContactInfo(parsedData.contactInfo);
-        if (parsedData.userId) setUserId(parsedData.userId);
+        if (parsedData.userId) {
+          setUserId(parsedData.userId);
+        } else {
+          const newUserId = uuidv4();
+          setUserId(newUserId);
+        }
       } catch (error) {
         console.error('Error parsing saved questionnaire data:', error);
+        const newUserId = uuidv4();
+        setUserId(newUserId);
       }
+    } else {
+      const newUserId = uuidv4();
+      setUserId(newUserId);
     }
   }, []);
 
   // Save data to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('questionnaire_data', JSON.stringify({
-      answers,
-      contactInfo,
-      userId
-    }));
+    if (userId) {
+      localStorage.setItem('questionnaire_data', JSON.stringify({
+        answers,
+        contactInfo,
+        userId
+      }));
+    }
   }, [answers, contactInfo, userId]);
 
   const updateAnswers = async (pageNum: number, pageAnswers: Record<string, any>) => {
@@ -66,21 +81,24 @@ export const QuestionnaireProvider: React.FC<{ children: React.ReactNode }> = ({
     setAnswers(newAnswers);
     
     // Save to Supabase after each page update
-    try {
-      await saveQuestionnaireData({
-        page: pageNum,
-        answers: newAnswers,
-        contact_info: contactInfo,
-        is_submitted: isSubmitted,
-        user_id: userId || undefined
-      });
-    } catch (error) {
-      console.error('Failed to save answers:', error);
-      toast({
-        title: "שגיאה בשמירת התשובות",
-        description: "אירעה שגיאה בשמירת התשובות שלך. אנא נסה שוב.",
-        variant: "destructive",
-      });
+    if (userId) {
+      try {
+        await saveQuestionnaireData({
+          page: pageNum,
+          answers: newAnswers,
+          contact_info: contactInfo,
+          is_submitted: isSubmitted,
+          user_id: userId
+        });
+        console.log(`Answers for page ${pageNum} saved successfully`);
+      } catch (error) {
+        console.error('Failed to save answers:', error);
+        toast({
+          title: "שגיאה בשמירת התשובות",
+          description: "אירעה שגיאה בשמירת התשובות שלך. אנא נסה שוב.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -89,7 +107,7 @@ export const QuestionnaireProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const nextPage = () => {
-    if (currentPage < 3) {
+    if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
       navigate(`/questionnaire/${currentPage + 1}`);
     }
@@ -104,13 +122,42 @@ export const QuestionnaireProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const submitQuestionnaire = async () => {
     try {
-      await saveQuestionnaireData({
-        page: currentPage,
-        answers,
-        contact_info: contactInfo,
-        is_submitted: true,
-        user_id: userId || undefined
-      });
+      // Check if user exists in registration_data by email or phone
+      if (contactInfo.email || contactInfo.phone) {
+        const existingUserId = await checkUserExists(contactInfo.email, contactInfo.phone);
+        if (existingUserId) {
+          // If user exists, update userId to match the one in registration_data
+          setUserId(existingUserId);
+          
+          // Update all previous submissions with the correct user_id
+          await saveQuestionnaireData({
+            page: currentPage,
+            answers,
+            contact_info: contactInfo,
+            is_submitted: true,
+            user_id: existingUserId
+          });
+        } else {
+          // If user doesn't exist, just submit with current userId
+          await saveQuestionnaireData({
+            page: currentPage,
+            answers,
+            contact_info: contactInfo,
+            is_submitted: true,
+            user_id: userId
+          });
+        }
+      } else {
+        // If no email or phone provided, just submit with current userId
+        await saveQuestionnaireData({
+          page: currentPage,
+          answers,
+          contact_info: contactInfo,
+          is_submitted: true,
+          user_id: userId
+        });
+      }
+      
       setIsSubmitted(true);
       navigate('/thank-you');
       
@@ -143,7 +190,8 @@ export const QuestionnaireProvider: React.FC<{ children: React.ReactNode }> = ({
     nextPage,
     prevPage,
     submitQuestionnaire,
-    setUserId
+    setUserId,
+    totalPages
   };
 
   return (

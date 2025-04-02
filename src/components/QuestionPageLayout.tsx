@@ -19,7 +19,7 @@ const QuestionPageLayout: React.FC<QuestionPageLayoutProps> = ({
   onSubmit,
   isLastPage = false
 }) => {
-  const { prevPage, nextPage, submitQuestionnaire } = useQuestionnaire();
+  const { prevPage, nextPage, submitQuestionnaire, totalPages } = useQuestionnaire();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +27,8 @@ const QuestionPageLayout: React.FC<QuestionPageLayoutProps> = ({
     
     if (isLastPage) {
       try {
-        await submitQuestionnaire();
+        console.log('This is the last page, submitting questionnaire...');
+        // The submission is already handled in the ContactInfoPage component
       } catch (error) {
         console.error('Error submitting questionnaire:', error);
       }
@@ -43,13 +44,13 @@ const QuestionPageLayout: React.FC<QuestionPageLayoutProps> = ({
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-brand-900">{title}</h2>
             <div className="text-sm text-brand-700">
-              עמוד {pageNumber} מתוך 3
+              עמוד {pageNumber} מתוך {totalPages}
             </div>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2.5 mt-4">
             <div 
               className="bg-brand-600 h-2.5 rounded-full transition-all duration-300" 
-              style={{ width: `${(pageNumber / 3) * 100}%` }}
+              style={{ width: `${(pageNumber / totalPages) * 100}%` }}
             ></div>
           </div>
         </CardHeader>
