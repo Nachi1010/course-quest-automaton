@@ -61,7 +61,8 @@ export async function saveQuestionnaireData(data: Partial<QuestionnaireEntry>): 
       const insertData = {
         ...data,
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        page: data.page // Ensure page is explicitly set for the insert
       };
       
       // Remove any undefined id when inserting
