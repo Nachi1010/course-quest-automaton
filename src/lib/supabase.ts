@@ -1,10 +1,11 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { Database } from '@/integrations/supabase/types';
 
 // Types for our Supabase tables
 export type QuestionnaireEntry = {
-  id?: string;
-  page: number;
+  id?: number; // Changed from string to number to match Supabase schema
+  page: number; // Made this required because the database requires it
   answers: Record<string, any>;
   contact_info?: Record<string, any>;
   is_submitted: boolean;
@@ -31,27 +32,46 @@ export async function saveQuestionnaireData(data: Partial<QuestionnaireEntry>): 
       existingEntry = existingData;
     }
 
+    // Make sure page is always set
+    if (!data.page && data.page !== 0) {
+      console.error('Page number is required');
+      throw new Error('Page number is required');
+    }
+
     if (existingEntry) {
       // Update existing entry
+      // We don't include id in the update data
+      const updateData = {
+        ...data,
+        updated_at: new Date().toISOString()
+      };
+      
+      // Remove id from update data (it's a number in DB but might be string in our code)
+      delete updateData.id;
+      
       const { error: updateError } = await supabase
         .from('questionnaire_data')
-        .update({
-          ...data,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', existingEntry.id);
       
       if (updateError) throw updateError;
       console.log('Updated existing questionnaire entry');
     } else {
       // Create new entry
+      const insertData = {
+        ...data,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      // Remove any undefined id when inserting
+      if (insertData.id === undefined) {
+        delete insertData.id;
+      }
+      
       const { error: insertError } = await supabase
         .from('questionnaire_data')
-        .insert({
-          ...data,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        });
+        .insert(insertData);
       
       if (insertError) throw insertError;
       console.log('Created new questionnaire entry');
