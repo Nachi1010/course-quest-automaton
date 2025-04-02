@@ -38,7 +38,7 @@ export const QuestionnaireProvider: React.FC<{ children: React.ReactNode }> = ({
   const [userId, setUserId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const totalPages = 4; // Now we have 4 pages including the contact page
+  const totalPages = 4;
 
   // Generate or load user ID on initial load
   useEffect(() => {
@@ -76,34 +76,41 @@ export const QuestionnaireProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [answers, contactInfo, userId]);
 
+  // Auto-save data to Supabase whenever answers or contactInfo change
+  useEffect(() => {
+    if (userId && (Object.keys(answers).length > 0 || Object.keys(contactInfo).length > 0)) {
+      const saveData = async () => {
+        try {
+          await saveQuestionnaireData({
+            page: currentPage,
+            answers: answers,
+            contact_info: contactInfo,
+            is_submitted: isSubmitted,
+            user_id: userId
+          });
+          console.log('Data auto-saved to Supabase');
+        } catch (error) {
+          console.error('Failed to auto-save data:', error);
+        }
+      };
+      
+      // Use a debounce-like approach with setTimeout
+      const timer = setTimeout(saveData, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [answers, contactInfo, currentPage, userId, isSubmitted]);
+
   const updateAnswers = async (pageNum: number, pageAnswers: Record<string, any>) => {
     const newAnswers = { ...answers, ...pageAnswers };
     setAnswers(newAnswers);
     
-    // Save to Supabase after each page update
-    if (userId) {
-      try {
-        await saveQuestionnaireData({
-          page: pageNum,
-          answers: newAnswers,
-          contact_info: contactInfo,
-          is_submitted: isSubmitted,
-          user_id: userId
-        });
-        console.log(`Answers for page ${pageNum} saved successfully`);
-      } catch (error) {
-        console.error('Failed to save answers:', error);
-        toast({
-          title: "שגיאה בשמירת התשובות",
-          description: "אירעה שגיאה בשמירת התשובות שלך. אנא נסה שוב.",
-          variant: "destructive",
-        });
-      }
-    }
+    // We'll now rely on the auto-save effect to save the data to Supabase
   };
 
   const updateContactInfo = (info: Record<string, any>) => {
     setContactInfo(info);
+    // Auto-save effect will save to Supabase
   };
 
   const nextPage = () => {
@@ -122,41 +129,24 @@ export const QuestionnaireProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const submitQuestionnaire = async () => {
     try {
-      // Check if user exists in registration_data by email or phone
-      if (contactInfo.email || contactInfo.phone) {
-        const existingUserId = await checkUserExists(contactInfo.email, contactInfo.phone);
-        if (existingUserId) {
-          // If user exists, update userId to match the one in registration_data
-          setUserId(existingUserId);
-          
-          // Update all previous submissions with the correct user_id
-          await saveQuestionnaireData({
-            page: currentPage,
-            answers,
-            contact_info: contactInfo,
-            is_submitted: true,
-            user_id: existingUserId
-          });
-        } else {
-          // If user doesn't exist, just submit with current userId
-          await saveQuestionnaireData({
-            page: currentPage,
-            answers,
-            contact_info: contactInfo,
-            is_submitted: true,
-            user_id: userId
-          });
-        }
-      } else {
-        // If no email or phone provided, just submit with current userId
-        await saveQuestionnaireData({
-          page: currentPage,
-          answers,
-          contact_info: contactInfo,
-          is_submitted: true,
-          user_id: userId
+      if (!userId) {
+        console.error('User ID is missing');
+        toast({
+          title: "אירעה שגיאה",
+          description: "מזהה משתמש חסר, אנא טען מחדש את הדף",
+          variant: "destructive",
         });
+        return Promise.reject(new Error('User ID is missing'));
       }
+
+      // Always submit with current data, regardless of completion
+      await saveQuestionnaireData({
+        page: currentPage,
+        answers,
+        contact_info: contactInfo,
+        is_submitted: true,
+        user_id: userId
+      });
       
       setIsSubmitted(true);
       navigate('/thank-you');
