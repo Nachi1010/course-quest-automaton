@@ -10,12 +10,14 @@ type QuestionnaireContextType = {
   currentPage: number;
   isSubmitted: boolean;
   userId: string | null;
+  ipAddress: string | null;
   updateAnswers: (pageNum: number, pageAnswers: Record<string, any>) => void;
   updateContactInfo: (info: Record<string, any>) => void;
   nextPage: () => void;
   prevPage: () => void;
   submitQuestionnaire: () => Promise<void>;
   setUserId: (id: string | null) => void;
+  setIpAddress: (ip: string | null) => void;
   totalPages: number;
 };
 
@@ -35,6 +37,7 @@ export const QuestionnaireProvider: React.FC<{ children: React.ReactNode }> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [ipAddress, setIpAddress] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const totalPages = 4;
@@ -53,6 +56,9 @@ export const QuestionnaireProvider: React.FC<{ children: React.ReactNode }> = ({
           const newUserId = uuidv4();
           setUserId(newUserId);
         }
+        if (parsedData.ipAddress) {
+          setIpAddress(parsedData.ipAddress);
+        }
       } catch (error) {
         console.error('Error parsing saved questionnaire data:', error);
         const newUserId = uuidv4();
@@ -70,25 +76,29 @@ export const QuestionnaireProvider: React.FC<{ children: React.ReactNode }> = ({
       localStorage.setItem('questionnaire_data', JSON.stringify({
         answers,
         contactInfo,
-        userId
+        userId,
+        ipAddress
       }));
     }
-  }, [answers, contactInfo, userId]);
+  }, [answers, contactInfo, userId, ipAddress]);
 
   // Removed auto-save effect - now we'll save explicitly with each page submission
 
   const updateAnswers = async (pageNum: number, pageAnswers: Record<string, any>) => {
+    // שמירת המידע בצד הלקוח עם שילוב של הנתונים החדשים עם הקיימים
     const newAnswers = { ...answers, ...pageAnswers };
     setAnswers(newAnswers);
     
-    // Save this page's data to Supabase
+    // שמירת המידע בצד השרת
     if (userId) {
       try {
+        // שמירת כל הנתונים של המשתמש, כולל המידע החדש
         await saveQuestionnaireData({
           page: pageNum,
-          answers: pageAnswers, // Only save this page's answers
+          answers: pageAnswers, // רק התשובות של הדף הנוכחי
           is_submitted: false,
-          user_id: userId
+          user_id: userId,
+          ip_address: ipAddress
         });
         console.log(`Data for page ${pageNum} saved to Supabase`);
       } catch (error) {
@@ -107,7 +117,8 @@ export const QuestionnaireProvider: React.FC<{ children: React.ReactNode }> = ({
           page: 4, // Contact info is always page 4
           contact_info: info,
           is_submitted: false,
-          user_id: userId
+          user_id: userId,
+          ip_address: ipAddress
         });
         console.log('Contact info saved to Supabase');
       } catch (error) {
@@ -147,12 +158,13 @@ export const QuestionnaireProvider: React.FC<{ children: React.ReactNode }> = ({
         let pageData: Partial<QuestionnaireEntry> = {
           page: page,
           is_submitted: true,
-          user_id: userId
+          user_id: userId,
+          ip_address: ipAddress
         };
         
         // Add page-specific data
         if (page === 4) {
-          // Contact info page
+          // Contact info page - שמירת פרטי התקשרות
           pageData.contact_info = contactInfo;
         } else {
           // Get relevant answers for this page
@@ -160,35 +172,33 @@ export const QuestionnaireProvider: React.FC<{ children: React.ReactNode }> = ({
           
           // Filter answers based on the page
           if (page === 1) {
-            // Professional questions
+            // Professional questions - שאלות מקצועיות
             const professionalKeys = [
-              'yearsExperience', 'programmingLanguages', 'aiExperience',
-              'preferredLearningMethod', 'projectGoals', 'educationLevel',
-              'softwareDevelopmentRoles', 'companySize', 'industryExperience',
-              'dataScience', 'frameworks', 'cloudPlatforms', 'aiModelsUsed'
+              'aiExperience', 'programmingSkill', 'educationLevel',
+              'specializations', 'preferredLearningMethod', 'professionalBackground',
+              'dataScience', 'careerStage'
             ];
             
             professionalKeys.forEach(key => {
               if (answers[key] !== undefined) pageAnswers[key] = answers[key];
             });
           } else if (page === 2) {
-            // Personal questions
+            // Personal questions - שאלות אישיות
             const personalKeys = [
-              'motivations', 'workStyle', 'learningChallenges', 'timeCommitment',
-              'strengths', 'learningEnvironment', 'learningGoals', 'previousAiCourses',
-              'careerAspirations', 'learningObstacles', 'communicationPreference',
-              'feedbackPreference'
+              'learningPurpose', 'personalityType', 'workPreference',
+              'challengeHandling', 'decisionMaking', 'feedbackPreference',
+              'motivationSource', 'stressManagement'
             ];
             
             personalKeys.forEach(key => {
               if (answers[key] !== undefined) pageAnswers[key] = answers[key];
             });
           } else if (page === 3) {
-            // Value add questions
+            // Value add questions - שאלות ערך מוסף
             const valueAddKeys = [
-              'industryInterests', 'aiEthics', 'futurePlans', 'aiImpact',
-              'dataPrivacy', 'aiRegulation', 'futureAiTrends', 'aiChallenges',
-              'aiToolsUsage', 'aiEducationMethod'
+              'investmentPriority', 'learningChallenges', 'growthAreas',
+              'careerVision', 'valueAssessment', 'teamPreference',
+              'ethicalConcerns', 'futureOutlook'
             ];
             
             valueAddKeys.forEach(key => {
@@ -230,12 +240,14 @@ export const QuestionnaireProvider: React.FC<{ children: React.ReactNode }> = ({
     currentPage,
     isSubmitted,
     userId,
+    ipAddress,
     updateAnswers,
     updateContactInfo,
     nextPage,
     prevPage,
     submitQuestionnaire,
     setUserId,
+    setIpAddress,
     totalPages
   };
 

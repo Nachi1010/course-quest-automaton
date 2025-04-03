@@ -10,7 +10,8 @@ export type QuestionnaireEntry = {
   is_submitted: boolean;
   created_at?: string;
   updated_at?: string;
-  user_id: string; 
+  user_id: string;
+  ip_address?: string | null;
 };
 
 export async function saveQuestionnaireData(data: Partial<QuestionnaireEntry>): Promise<void> {
@@ -22,7 +23,7 @@ export async function saveQuestionnaireData(data: Partial<QuestionnaireEntry>): 
     if (data.user_id) {
       const { data: existingUser } = await supabase
         .from('registration_data')
-        .select('user_id')
+        .select('user_id, metadata')
         .eq('user_id', data.user_id)
         .maybeSingle();
       
@@ -32,12 +33,43 @@ export async function saveQuestionnaireData(data: Partial<QuestionnaireEntry>): 
           .from('registration_data')
           .insert({
             user_id: data.user_id,
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            metadata: data.ip_address ? { ip_address: data.ip_address } : null
           });
         
         if (insertUserError) {
           console.error('Error creating user in registration_data:', insertUserError);
           // Continue anyway - we'll show the error but still attempt to save
+        }
+      } else if (data.ip_address && existingUser.metadata === null) {
+        // Update user with IP address if metadata is null
+        const { error: updateUserError } = await supabase
+          .from('registration_data')
+          .update({ metadata: { ip_address: data.ip_address } })
+          .eq('user_id', data.user_id);
+          
+        if (updateUserError) {
+          console.error('Error updating user IP address in metadata:', updateUserError);
+        }
+      } else if (data.ip_address && existingUser.metadata) {
+        // Add IP address to existing metadata
+        // Check if metadata is an object and has ip_address
+        const metadata = existingUser.metadata as Record<string, any>;
+        const hasIpAddress = typeof metadata === 'object' && metadata !== null && 'ip_address' in metadata;
+        
+        if (!hasIpAddress) {
+          const updatedMetadata = typeof metadata === 'object' && metadata !== null 
+            ? { ...metadata, ip_address: data.ip_address }
+            : { ip_address: data.ip_address };
+          
+          const { error: updateUserError } = await supabase
+            .from('registration_data')
+            .update({ metadata: updatedMetadata })
+            .eq('user_id', data.user_id);
+            
+          if (updateUserError) {
+            console.error('Error updating user IP address in metadata:', updateUserError);
+          }
         }
       }
     }
@@ -67,6 +99,11 @@ export async function saveQuestionnaireData(data: Partial<QuestionnaireEntry>): 
     // Remove any undefined id when inserting
     if (insertData.id === undefined) {
       delete insertData.id;
+    }
+    
+    // Remove ip_address from insertion data as it's not a column in questionnaire_data
+    if ('ip_address' in insertData) {
+      delete insertData.ip_address;
     }
     
     const { error: insertError } = await supabase

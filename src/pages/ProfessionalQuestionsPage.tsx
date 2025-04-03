@@ -14,44 +14,117 @@ import {
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/components/ui/use-toast';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { InfoIcon } from 'lucide-react';
+
+type FormData = {
+  aiExperience: string;
+  programmingSkill: string;
+  educationLevel: string;
+  specializations: string;
+  preferredLearningMethod: string;
+  professionalBackground: string;
+  dataScience: string;
+  careerStage: string;
+};
+
+// המיפוי של ערכי השדות באנגלית לטקסט בעברית
+const hebrewTextMapping = {
+  aiExperience: {
+    beginner: "מתחיל - היכרות בסיסית עם המושגים",
+    intermediate: "בינוני - התנסות בכלים ויישומים",
+    advanced: "מתקדם - עבודה עם מודלים ויישומים מורכבים",
+    expert: "מומחה - ניסיון בפיתוח ויישום פתרונות בתעשייה",
+  },
+  programmingSkill: {
+    none: "ללא ניסיון תכנותי",
+    beginner: "מתחיל - היכרות בסיסית עם שפת תכנות אחת או יותר",
+    intermediate: "בינוני - יכולת לבנות יישומים פשוטים",
+    advanced: "מתקדם - ניסיון רב בפיתוח ומספר שפות תכנות",
+    expert: "מומחה - יכולת לפתח מערכות מורכבות וידע עמוק",
+  },
+  educationLevel: {
+    "high-school": "תיכונית",
+    vocational: "הכשרה מקצועית",
+    bachelor: "תואר ראשון",
+    master: "תואר שני",
+    phd: "דוקטורט",
+  },
+  specializations: {
+    nlp: "עיבוד שפה טבעית (NLP)",
+    "computer-vision": "ראייה ממוחשבת (Computer Vision)",
+    "generative-ai": "בינה מלאכותית יצירתית (Generative AI)",
+    "machine-learning": "למידת מכונה (Machine Learning)",
+    mlops: "תשתיות ופריסה של מערכות AI (MLOps)",
+  },
+  preferredLearningMethod: {
+    "hands-on": "למידה מעשית (Hands-on projects)",
+    theoretical: "למידה תיאורטית עם הבנת היסודות",
+    "self-paced": "למידה עצמאית בקצב אישי",
+    mentored: "למידה בליווי מנטור",
+    group: "למידה קבוצתית ושיתופית",
+  },
+  professionalBackground: {
+    software: "פיתוח תוכנה / הנדסת תוכנה",
+    data: "מדע הנתונים / אנליטיקה",
+    management: "ניהול / מנהל עסקים",
+    design: "עיצוב / UX / UI",
+    marketing: "שיווק / מכירות",
+    student: "סטודנט / בלימודים",
+    other: "אחר",
+  },
+  dataScience: {
+    none: "ללא ניסיון בתחום",
+    basic: "בסיסי - הבנה בסיסית של מושגים",
+    intermediate: "בינוני - התנסות בכלי ויזואליזציה וניתוח",
+    advanced: "מתקדם - בניית מודלים ועבודה עם Big Data",
+    expert: "מומחה - יכולת לפתח אלגוריתמים מורכבים",
+  },
+  careerStage: {
+    student: "סטודנט/ית או בהכשרה",
+    junior: "ג'וניור - בתחילת הדרך המקצועית",
+    mid: "מיד-לבל - עם ניסיון של 3-5 שנים",
+    senior: "סניור - מומחה/ית עם ניסיון משמעותי",
+    leadership: "תפקיד ניהולי או הובלה מקצועית",
+  },
+};
 
 const ProfessionalQuestionsPage: React.FC = () => {
   const { answers, updateAnswers } = useQuestionnaire();
   const { toast } = useToast();
-  const [formData, setFormData] = useState({
-    yearsExperience: answers.yearsExperience || '',
-    programmingLanguages: answers.programmingLanguages || '',
-    aiExperience: answers.aiExperience || '',
-    preferredLearningMethod: answers.preferredLearningMethod || '',
-    projectGoals: answers.projectGoals || '',
-    educationLevel: answers.educationLevel || '',
-    softwareDevelopmentRoles: answers.softwareDevelopmentRoles || '',
-    companySize: answers.companySize || '',
-    industryExperience: answers.industryExperience || '',
-    dataScience: answers.dataScience || '',
-    frameworks: answers.frameworks || '',
-    cloudPlatforms: answers.cloudPlatforms || '',
-    aiModelsUsed: answers.aiModelsUsed || '',
+  const [showValidationMessage, setShowValidationMessage] = useState(false);
+
+  const [formData, setFormData] = useState<FormData>({
+    aiExperience: '',
+    programmingSkill: '',
+    educationLevel: '',
+    specializations: '',
+    preferredLearningMethod: '',
+    professionalBackground: '',
+    dataScience: '',
+    careerStage: '',
   });
 
-  // Load data if exists
   useEffect(() => {
+    // Load saved data if available
     if (answers && Object.keys(answers).length > 0) {
-      setFormData({
-        yearsExperience: answers.yearsExperience || '',
-        programmingLanguages: answers.programmingLanguages || '',
-        aiExperience: answers.aiExperience || '',
-        preferredLearningMethod: answers.preferredLearningMethod || '',
-        projectGoals: answers.projectGoals || '',
-        educationLevel: answers.educationLevel || '',
-        softwareDevelopmentRoles: answers.softwareDevelopmentRoles || '',
-        companySize: answers.companySize || '',
-        industryExperience: answers.industryExperience || '',
-        dataScience: answers.dataScience || '',
-        frameworks: answers.frameworks || '',
-        cloudPlatforms: answers.cloudPlatforms || '',
-        aiModelsUsed: answers.aiModelsUsed || '',
+      // עדכן רק את השדות שקיימים בתשובות השמורות
+      const updatedFormData = { ...formData };
+      let hasUpdates = false;
+
+      // בדוק כל שדה אם יש לו ערך שמור
+      Object.keys(formData).forEach((key) => {
+        const fieldKey = key as keyof FormData;
+        if (answers[fieldKey]) {
+          updatedFormData[fieldKey] = answers[fieldKey];
+          hasUpdates = true;
+        }
       });
+
+      // עדכן את הטופס רק אם נמצאו עדכונים
+      if (hasUpdates) {
+        setFormData(updatedFormData);
+      }
     }
   }, [answers]);
 
@@ -64,8 +137,12 @@ const ProfessionalQuestionsPage: React.FC = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleRadioChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleRadioChange = (field: keyof FormData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    // Clear validation message if user changes something
+    if (showValidationMessage) {
+      setShowValidationMessage(false);
+    }
   };
 
   const handleCheckboxChange = (name: string, value: string, checked: boolean) => {
@@ -86,327 +163,348 @@ const ProfessionalQuestionsPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Basic validation
-    if (!formData.yearsExperience) {
+    try {
+      // המרת ערכים באנגלית לטקסט בעברית לפני שמירה בדאטהבייס
+      const hebrewFormData: Record<string, string> = {};
+      
+      // עבור כל שדה בטופס, המר את הערך לטקסט בעברית אם קיים
+      Object.keys(formData).forEach((key) => {
+        const field = key as keyof FormData;
+        const value = formData[field];
+        
+        if (value && hebrewTextMapping[field]) {
+          const mapping = hebrewTextMapping[field] as Record<string, string>;
+          if (mapping[value]) {
+            // שמור את הטקסט בעברית
+            hebrewFormData[field] = mapping[value];
+          } else {
+            // אם אין מיפוי, שמור את הערך המקורי
+            hebrewFormData[field] = value;
+          }
+        } else {
+          // אם אין ערך או אין מיפוי לשדה, שמור את הערך המקורי (אם קיים)
+          if (value) {
+            hebrewFormData[field] = value;
+          }
+        }
+      });
+      
+      console.log("נתונים שנשלחים לשרת:", hebrewFormData);
+      
+      // שומר את התשובות בעברית
+      await updateAnswers(1, hebrewFormData);
+      
+      // בדוק אם יש שדות ריקים - רק להצגת האזהרה, לא למניעת ניווט
+      const hasEmptyFields = Object.values(formData).some(value => !value);
+      
+      if (hasEmptyFields) {
+        setShowValidationMessage(true);
+        toast({
+          title: "שדות חסרים",
+          description: "לא מילאת את כל השאלות. מומלץ להשלים את כל השדות.",
+          variant: "destructive",
+        });
+      } else {
+        setShowValidationMessage(false);
+      }
+      
+      // תמיד מחזיר true כדי לאפשר ניווט לדף הבא
+      return true;
+    } catch (error) {
+      console.error("שגיאה בשמירת הנתונים:", error);
       toast({
-        title: "שדה חסר",
-        description: "אנא ציין את שנות הניסיון שלך",
+        title: "אירעה שגיאה",
+        description: "לא הצלחנו לשמור את התשובות שלך. אנא נסה שוב.",
         variant: "destructive",
       });
-      return;
+      // למרות השגיאה, עדיין מאפשרים ניווט
+      return true;
     }
-    
-    // Update answers in context
-    await updateAnswers(1, formData);
   };
 
   return (
     <QuestionPageLayout
       pageNumber={1}
-      title="שאלות מקצועיות"
+      title="הפרופיל המקצועי שלך"
       onSubmit={handleSubmit}
     >
+      {showValidationMessage && (
+        <Alert className="mb-6 bg-red-50 border-red-200 text-red-800">
+          <InfoIcon className="h-5 w-5 ml-2" />
+          <AlertDescription>
+            לא מילאת את כל השאלות. מומלץ להשלים את כל השדות.
+          </AlertDescription>
+        </Alert>
+      )}
+    
       <div className="space-y-6">
-        <div className="space-y-2">
-          <Label htmlFor="yearsExperience">כמה שנות ניסיון יש לך בפיתוח תוכנה?</Label>
-          <RadioGroup 
-            value={formData.yearsExperience} 
-            onValueChange={(value) => handleRadioChange('yearsExperience', value)}
-            className="space-y-2"
-          >
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="0-1" id="years-0-1" />
-              <Label htmlFor="years-0-1">פחות משנה</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="1-3" id="years-1-3" />
-              <Label htmlFor="years-1-3">1-3 שנים</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="3-5" id="years-3-5" />
-              <Label htmlFor="years-3-5">3-5 שנים</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="5-10" id="years-5-10" />
-              <Label htmlFor="years-5-10">5-10 שנים</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="10+" id="years-10-plus" />
-              <Label htmlFor="years-10-plus">10+ שנים</Label>
-            </div>
-          </RadioGroup>
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="space-y-4">
+            <Label htmlFor="aiExperience" className="text-xl font-bold text-gray-900 block mb-3">מה רמת הניסיון שלך עם בינה מלאכותית?</Label>
+            <RadioGroup 
+              value={formData.aiExperience} 
+              onValueChange={(value) => handleRadioChange('aiExperience', value)}
+              className="space-y-3 mt-2"
+              dir="rtl"
+            >
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="beginner" id="ai-beginner" />
+                <Label htmlFor="ai-beginner" className="text-gray-700 text-right w-full">מתחיל - היכרות בסיסית עם המושגים</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="intermediate" id="ai-intermediate" />
+                <Label htmlFor="ai-intermediate" className="text-gray-700 text-right w-full">בינוני - התנסות בכלים ויישומים</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="advanced" id="ai-advanced" />
+                <Label htmlFor="ai-advanced" className="text-gray-700 text-right w-full">מתקדם - עבודה עם מודלים ויישומים מורכבים</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="expert" id="ai-expert" />
+                <Label htmlFor="ai-expert" className="text-gray-700 text-right w-full">מומחה - ניסיון בפיתוח ויישום פתרונות בתעשייה</Label>
+              </div>
+            </RadioGroup>
+          </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="educationLevel">מהי רמת ההשכלה הגבוהה ביותר שלך?</Label>
-          <RadioGroup 
-            value={formData.educationLevel} 
-            onValueChange={(value) => handleRadioChange('educationLevel', value)}
-            className="space-y-2"
-          >
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="high-school" id="edu-high-school" />
-              <Label htmlFor="edu-high-school">תעודת בגרות</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="vocational" id="edu-vocational" />
-              <Label htmlFor="edu-vocational">לימודי מקצוע / הכשרה טכנית</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="bachelor" id="edu-bachelor" />
-              <Label htmlFor="edu-bachelor">תואר ראשון</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="master" id="edu-master" />
-              <Label htmlFor="edu-master">תואר שני</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="phd" id="edu-phd" />
-              <Label htmlFor="edu-phd">דוקטורט</Label>
-            </div>
-          </RadioGroup>
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="space-y-4">
+            <Label htmlFor="programmingSkill" className="text-xl font-bold text-gray-900 block mb-3">כיצד תדרג את מיומנויות התכנות שלך?</Label>
+            <RadioGroup 
+              value={formData.programmingSkill} 
+              onValueChange={(value) => handleRadioChange('programmingSkill', value)}
+              className="space-y-3 mt-2"
+              dir="rtl"
+            >
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="none" id="prog-none" />
+                <Label htmlFor="prog-none" className="text-gray-700 text-right w-full">ללא ניסיון תכנותי</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="beginner" id="prog-beginner" />
+                <Label htmlFor="prog-beginner" className="text-gray-700 text-right w-full">מתחיל - היכרות בסיסית עם שפת תכנות אחת או יותר</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="intermediate" id="prog-intermediate" />
+                <Label htmlFor="prog-intermediate" className="text-gray-700 text-right w-full">בינוני - יכולת לבנות יישומים פשוטים</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="advanced" id="prog-advanced" />
+                <Label htmlFor="prog-advanced" className="text-gray-700 text-right w-full">מתקדם - ניסיון רב בפיתוח ומספר שפות תכנות</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="expert" id="prog-expert" />
+                <Label htmlFor="prog-expert" className="text-gray-700 text-right w-full">מומחה - יכולת לפתח מערכות מורכבות וידע עמוק</Label>
+              </div>
+            </RadioGroup>
+          </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="softwareDevelopmentRoles">מהו תפקידך העיקרי בפיתוח תוכנה?</Label>
-          <RadioGroup 
-            value={formData.softwareDevelopmentRoles} 
-            onValueChange={(value) => handleRadioChange('softwareDevelopmentRoles', value)}
-            className="space-y-2"
-          >
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="frontend" id="role-frontend" />
-              <Label htmlFor="role-frontend">מפתח/ת צד לקוח (Front-end)</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="backend" id="role-backend" />
-              <Label htmlFor="role-backend">מפתח/ת צד שרת (Back-end)</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="fullstack" id="role-fullstack" />
-              <Label htmlFor="role-fullstack">מפתח/ת פול-סטאק</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="data" id="role-data" />
-              <Label htmlFor="role-data">מהנדס/ת נתונים / מדען/ית נתונים</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="devops" id="role-devops" />
-              <Label htmlFor="role-devops">מהנדס/ת DevOps / Cloud</Label>
-            </div>
-          </RadioGroup>
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="space-y-4">
+            <Label htmlFor="educationLevel" className="text-xl font-bold text-gray-900 block mb-3">מהי רמת ההשכלה הגבוהה ביותר שלך?</Label>
+            <RadioGroup 
+              value={formData.educationLevel} 
+              onValueChange={(value) => handleRadioChange('educationLevel', value)}
+              className="space-y-3 mt-2"
+              dir="rtl"
+            >
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="high-school" id="edu-high-school" />
+                <Label htmlFor="edu-high-school" className="text-gray-700 text-right w-full">תיכונית</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="vocational" id="edu-vocational" />
+                <Label htmlFor="edu-vocational" className="text-gray-700 text-right w-full">הכשרה מקצועית</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="bachelor" id="edu-bachelor" />
+                <Label htmlFor="edu-bachelor" className="text-gray-700 text-right w-full">תואר ראשון</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="master" id="edu-master" />
+                <Label htmlFor="edu-master" className="text-gray-700 text-right w-full">תואר שני</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="phd" id="edu-phd" />
+                <Label htmlFor="edu-phd" className="text-gray-700 text-right w-full">דוקטורט</Label>
+              </div>
+            </RadioGroup>
+          </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="companySize">מהו גודל הארגון בו את/ה עובד/ת?</Label>
-          <RadioGroup 
-            value={formData.companySize} 
-            onValueChange={(value) => handleRadioChange('companySize', value)}
-            className="space-y-2"
-          >
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="startup" id="company-startup" />
-              <Label htmlFor="company-startup">סטארט-אפ (1-20 עובדים)</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="small" id="company-small" />
-              <Label htmlFor="company-small">חברה קטנה (21-100 עובדים)</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="medium" id="company-medium" />
-              <Label htmlFor="company-medium">חברה בינונית (101-500 עובדים)</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="large" id="company-large" />
-              <Label htmlFor="company-large">חברה גדולה (501-1000 עובדים)</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="enterprise" id="company-enterprise" />
-              <Label htmlFor="company-enterprise">חברת ענק (1000+ עובדים)</Label>
-            </div>
-          </RadioGroup>
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="space-y-4">
+            <Label htmlFor="specializations" className="text-xl font-bold text-gray-900 block mb-3">באילו תחומי התמחות של AI אתה/את מתעניין/ת?</Label>
+            <RadioGroup 
+              value={formData.specializations} 
+              onValueChange={(value) => handleRadioChange('specializations', value)}
+              className="space-y-3 mt-2"
+              dir="rtl"
+            >
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="nlp" id="spec-nlp" />
+                <Label htmlFor="spec-nlp" className="text-gray-700 text-right w-full">עיבוד שפה טבעית (NLP)</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="computer-vision" id="spec-cv" />
+                <Label htmlFor="spec-cv" className="text-gray-700 text-right w-full">ראייה ממוחשבת (Computer Vision)</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="generative-ai" id="spec-gen" />
+                <Label htmlFor="spec-gen" className="text-gray-700 text-right w-full">בינה מלאכותית יצירתית (Generative AI)</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="machine-learning" id="spec-ml" />
+                <Label htmlFor="spec-ml" className="text-gray-700 text-right w-full">למידת מכונה (Machine Learning)</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="mlops" id="spec-mlops" />
+                <Label htmlFor="spec-mlops" className="text-gray-700 text-right w-full">תשתיות ופריסה של מערכות AI (MLOps)</Label>
+              </div>
+            </RadioGroup>
+          </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="programmingLanguages">באילו שפות תכנות יש לך ניסיון?</Label>
-          <RadioGroup 
-            value={formData.programmingLanguages} 
-            onValueChange={(value) => handleRadioChange('programmingLanguages', value)}
-            className="space-y-2"
-          >
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="javascript" id="lang-js" />
-              <Label htmlFor="lang-js">JavaScript/TypeScript</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="python" id="lang-python" />
-              <Label htmlFor="lang-python">Python</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="java-csharp" id="lang-java-csharp" />
-              <Label htmlFor="lang-java-csharp">Java/C#</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="cpp" id="lang-cpp" />
-              <Label htmlFor="lang-cpp">C/C++</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="other" id="lang-other" />
-              <Label htmlFor="lang-other">שפות אחרות</Label>
-            </div>
-          </RadioGroup>
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="space-y-4">
+            <Label htmlFor="preferredLearningMethod" className="text-xl font-bold text-gray-900 block mb-3">איזו שיטת למידה אתה/את מעדיף/ה?</Label>
+            <RadioGroup 
+              value={formData.preferredLearningMethod} 
+              onValueChange={(value) => handleRadioChange('preferredLearningMethod', value)}
+              className="space-y-3 mt-2"
+              dir="rtl"
+            >
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="hands-on" id="learn-hands-on" />
+                <Label htmlFor="learn-hands-on" className="text-gray-700 text-right w-full">למידה מעשית (Hands-on projects)</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="theoretical" id="learn-theoretical" />
+                <Label htmlFor="learn-theoretical" className="text-gray-700 text-right w-full">למידה תיאורטית עם הבנת היסודות</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="self-paced" id="learn-self-paced" />
+                <Label htmlFor="learn-self-paced" className="text-gray-700 text-right w-full">למידה עצמאית בקצב אישי</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="mentored" id="learn-mentored" />
+                <Label htmlFor="learn-mentored" className="text-gray-700 text-right w-full">למידה בליווי מנטור</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="group" id="learn-group" />
+                <Label htmlFor="learn-group" className="text-gray-700 text-right w-full">למידה קבוצתית ושיתופית</Label>
+              </div>
+            </RadioGroup>
+          </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="aiExperience">מהי רמת הניסיון שלך עם AI?</Label>
-          <RadioGroup 
-            value={formData.aiExperience} 
-            onValueChange={(value) => handleRadioChange('aiExperience', value)}
-            className="space-y-2"
-          >
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="none" id="ai-none" />
-              <Label htmlFor="ai-none">אין ניסיון</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="beginner" id="ai-beginner" />
-              <Label htmlFor="ai-beginner">מתחיל - השתמשתי בכלי AI בסיסיים</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="intermediate" id="ai-intermediate" />
-              <Label htmlFor="ai-intermediate">בינוני - השתמשתי במספר כלי AI ומודלים</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="advanced" id="ai-advanced" />
-              <Label htmlFor="ai-advanced">מתקדם - בניתי פרויקטים עם AI</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="expert" id="ai-expert" />
-              <Label htmlFor="ai-expert">מומחה - ניסיון נרחב בפיתוח פתרונות AI</Label>
-            </div>
-          </RadioGroup>
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="space-y-4">
+            <Label htmlFor="professionalBackground" className="text-xl font-bold text-gray-900 block mb-3">מה הרקע המקצועי העיקרי שלך?</Label>
+            <RadioGroup 
+              value={formData.professionalBackground} 
+              onValueChange={(value) => handleRadioChange('professionalBackground', value)}
+              className="space-y-3 mt-2"
+              dir="rtl"
+            >
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="software" id="bg-software" />
+                <Label htmlFor="bg-software" className="text-gray-700 text-right w-full">פיתוח תוכנה / הנדסת תוכנה</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="data" id="bg-data" />
+                <Label htmlFor="bg-data" className="text-gray-700 text-right w-full">מדע הנתונים / אנליטיקה</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="management" id="bg-management" />
+                <Label htmlFor="bg-management" className="text-gray-700 text-right w-full">ניהול / מנהל עסקים</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="design" id="bg-design" />
+                <Label htmlFor="bg-design" className="text-gray-700 text-right w-full">עיצוב / UX / UI</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="marketing" id="bg-marketing" />
+                <Label htmlFor="bg-marketing" className="text-gray-700 text-right w-full">שיווק / מכירות</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="student" id="bg-student" />
+                <Label htmlFor="bg-student" className="text-gray-700 text-right w-full">סטודנט / בלימודים</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="other" id="bg-other" />
+                <Label htmlFor="bg-other" className="text-gray-700 text-right w-full">אחר</Label>
+              </div>
+            </RadioGroup>
+          </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="preferredLearningMethod">מהי שיטת הלמידה המועדפת עליך?</Label>
-          <RadioGroup 
-            value={formData.preferredLearningMethod} 
-            onValueChange={(value) => handleRadioChange('preferredLearningMethod', value)}
-            className="space-y-2"
-          >
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="video" id="learn-video" />
-              <Label htmlFor="learn-video">הרצאות וסרטוני וידאו</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="reading" id="learn-reading" />
-              <Label htmlFor="learn-reading">קריאת מאמרים ותיעוד</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="hands-on" id="learn-hands-on" />
-              <Label htmlFor="learn-hands-on">תרגילים מעשיים ופרויקטים</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="interactive" id="learn-interactive" />
-              <Label htmlFor="learn-interactive">למידה אינטראקטיבית ותרגול</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="mentor" id="learn-mentor" />
-              <Label htmlFor="learn-mentor">הדרכה אישית וחניכה</Label>
-            </div>
-          </RadioGroup>
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="space-y-4">
+            <Label htmlFor="dataScience" className="text-xl font-bold text-gray-900 block mb-3">מהי רמת הידע שלך במדע הנתונים?</Label>
+            <RadioGroup 
+              value={formData.dataScience} 
+              onValueChange={(value) => handleRadioChange('dataScience', value)}
+              className="space-y-3 mt-2"
+              dir="rtl"
+            >
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="none" id="ds-none" />
+                <Label htmlFor="ds-none" className="text-gray-700 text-right w-full">ללא ידע</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="basic" id="ds-basic" />
+                <Label htmlFor="ds-basic" className="text-gray-700 text-right w-full">בסיסי - הבנה בסיסית של מושגים</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="intermediate" id="ds-intermediate" />
+                <Label htmlFor="ds-intermediate" className="text-gray-700 text-right w-full">בינוני - התנסות בכלי ויזואליזציה וניתוח</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="advanced" id="ds-advanced" />
+                <Label htmlFor="ds-advanced" className="text-gray-700 text-right w-full">מתקדם - בניית מודלים ועבודה עם Big Data</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="expert" id="ds-expert" />
+                <Label htmlFor="ds-expert" className="text-gray-700 text-right w-full">מומחה - יכולת לפתח אלגוריתמים מורכבים</Label>
+              </div>
+            </RadioGroup>
+          </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="projectGoals">מהי המטרה העיקרית שלך בלמידת AI?</Label>
-          <RadioGroup 
-            value={formData.projectGoals} 
-            onValueChange={(value) => handleRadioChange('projectGoals', value)}
-            className="space-y-2"
-          >
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="career" id="goal-career" />
-              <Label htmlFor="goal-career">קידום קריירה</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="project" id="goal-project" />
-              <Label htmlFor="goal-project">פיתוח פרויקט ספציפי</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="business" id="goal-business" />
-              <Label htmlFor="goal-business">פיתוח מיזם/עסק</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="academic" id="goal-academic" />
-              <Label htmlFor="goal-academic">מחקר אקדמי</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="curiosity" id="goal-curiosity" />
-              <Label htmlFor="goal-curiosity">סקרנות אישית</Label>
-            </div>
-          </RadioGroup>
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="space-y-4">
+            <Label htmlFor="careerStage" className="text-xl font-bold text-gray-900 block mb-3">באיזה שלב בקריירה אתה/את כרגע?</Label>
+            <RadioGroup 
+              value={formData.careerStage} 
+              onValueChange={(value) => handleRadioChange('careerStage', value)}
+              className="space-y-3 mt-2"
+              dir="rtl"
+            >
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="student" id="career-student" />
+                <Label htmlFor="career-student" className="text-gray-700 text-right w-full">סטודנט/ית או בהכשרה</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="junior" id="career-junior" />
+                <Label htmlFor="career-junior" className="text-gray-700 text-right w-full">ג'וניור - בתחילת הדרך המקצועית</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="mid" id="career-mid" />
+                <Label htmlFor="career-mid" className="text-gray-700 text-right w-full">מיד-לבל - עם ניסיון של 3-5 שנים</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="senior" id="career-senior" />
+                <Label htmlFor="career-senior" className="text-gray-700 text-right w-full">סניור - מומחה/ית עם ניסיון משמעותי</Label>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <RadioGroupItem value="leadership" id="career-leadership" />
+                <Label htmlFor="career-leadership" className="text-gray-700 text-right w-full">תפקיד ניהולי או הובלה מקצועית</Label>
+              </div>
+            </RadioGroup>
+          </div>
         </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="industryExperience">באיזו תעשייה יש לך את הניסיון הרב ביותר?</Label>
-          <RadioGroup 
-            value={formData.industryExperience} 
-            onValueChange={(value) => handleRadioChange('industryExperience', value)}
-            className="space-y-2"
-          >
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="tech" id="industry-tech" />
-              <Label htmlFor="industry-tech">טכנולוגיה/תוכנה</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="finance" id="industry-finance" />
-              <Label htmlFor="industry-finance">פיננסים/בנקאות</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="healthcare" id="industry-healthcare" />
-              <Label htmlFor="industry-healthcare">בריאות/רפואה</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="education" id="industry-education" />
-              <Label htmlFor="industry-education">חינוך/אקדמיה</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="other" id="industry-other" />
-              <Label htmlFor="industry-other">אחר</Label>
-            </div>
-          </RadioGroup>
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="dataScience">האם יש לך ניסיון במדעי הנתונים?</Label>
-          <RadioGroup 
-            value={formData.dataScience} 
-            onValueChange={(value) => handleRadioChange('dataScience', value)}
-            className="space-y-2"
-          >
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="none" id="data-none" />
-              <Label htmlFor="data-none">אין ניסיון</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="basic" id="data-basic" />
-              <Label htmlFor="data-basic">ידע בסיסי</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="intermediate" id="data-intermediate" />
-              <Label htmlFor="data-intermediate">ניסיון בינוני</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="advanced" id="data-advanced" />
-              <Label htmlFor="data-advanced">ניסיון מתקדם</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="professional" id="data-professional" />
-              <Label htmlFor="data-professional">מקצועי/מומחה</Label>
-            </div>
-          </RadioGroup>
-        </div>
-
       </div>
     </QuestionPageLayout>
   );
