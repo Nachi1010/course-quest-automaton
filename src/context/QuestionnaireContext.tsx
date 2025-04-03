@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { saveQuestionnaireData, checkUserExists, QuestionnaireEntry } from '@/lib/supabase';
@@ -76,41 +75,45 @@ export const QuestionnaireProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [answers, contactInfo, userId]);
 
-  // Auto-save data to Supabase whenever answers or contactInfo change
-  useEffect(() => {
-    if (userId && (Object.keys(answers).length > 0 || Object.keys(contactInfo).length > 0)) {
-      const saveData = async () => {
-        try {
-          await saveQuestionnaireData({
-            page: currentPage,
-            answers: answers,
-            contact_info: contactInfo,
-            is_submitted: isSubmitted,
-            user_id: userId
-          });
-          console.log('Data auto-saved to Supabase');
-        } catch (error) {
-          console.error('Failed to auto-save data:', error);
-        }
-      };
-      
-      // Use a debounce-like approach with setTimeout
-      const timer = setTimeout(saveData, 1000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [answers, contactInfo, currentPage, userId, isSubmitted]);
+  // Removed auto-save effect - now we'll save explicitly with each page submission
 
   const updateAnswers = async (pageNum: number, pageAnswers: Record<string, any>) => {
     const newAnswers = { ...answers, ...pageAnswers };
     setAnswers(newAnswers);
     
-    // We'll now rely on the auto-save effect to save the data to Supabase
+    // Save this page's data to Supabase
+    if (userId) {
+      try {
+        await saveQuestionnaireData({
+          page: pageNum,
+          answers: pageAnswers, // Only save this page's answers
+          is_submitted: false,
+          user_id: userId
+        });
+        console.log(`Data for page ${pageNum} saved to Supabase`);
+      } catch (error) {
+        console.error(`Failed to save data for page ${pageNum}:`, error);
+      }
+    }
   };
 
   const updateContactInfo = (info: Record<string, any>) => {
     setContactInfo(info);
-    // Auto-save effect will save to Supabase
+    
+    // Save contact info to Supabase
+    if (userId) {
+      try {
+        saveQuestionnaireData({
+          page: 4, // Contact info is always page 4
+          contact_info: info,
+          is_submitted: false,
+          user_id: userId
+        });
+        console.log('Contact info saved to Supabase');
+      } catch (error) {
+        console.error('Failed to save contact info:', error);
+      }
+    }
   };
 
   const nextPage = () => {
@@ -139,14 +142,66 @@ export const QuestionnaireProvider: React.FC<{ children: React.ReactNode }> = ({
         return Promise.reject(new Error('User ID is missing'));
       }
 
-      // Always submit with current data, regardless of completion
-      await saveQuestionnaireData({
-        page: currentPage,
-        answers,
-        contact_info: contactInfo,
-        is_submitted: true,
-        user_id: userId
-      });
+      // Submit all pages with is_submitted=true
+      for (let page = 1; page <= totalPages; page++) {
+        let pageData: Partial<QuestionnaireEntry> = {
+          page: page,
+          is_submitted: true,
+          user_id: userId
+        };
+        
+        // Add page-specific data
+        if (page === 4) {
+          // Contact info page
+          pageData.contact_info = contactInfo;
+        } else {
+          // Get relevant answers for this page
+          const pageAnswers: Record<string, any> = {};
+          
+          // Filter answers based on the page
+          if (page === 1) {
+            // Professional questions
+            const professionalKeys = [
+              'yearsExperience', 'programmingLanguages', 'aiExperience',
+              'preferredLearningMethod', 'projectGoals', 'educationLevel',
+              'softwareDevelopmentRoles', 'companySize', 'industryExperience',
+              'dataScience', 'frameworks', 'cloudPlatforms', 'aiModelsUsed'
+            ];
+            
+            professionalKeys.forEach(key => {
+              if (answers[key] !== undefined) pageAnswers[key] = answers[key];
+            });
+          } else if (page === 2) {
+            // Personal questions
+            const personalKeys = [
+              'motivations', 'workStyle', 'learningChallenges', 'timeCommitment',
+              'strengths', 'learningEnvironment', 'learningGoals', 'previousAiCourses',
+              'careerAspirations', 'learningObstacles', 'communicationPreference',
+              'feedbackPreference'
+            ];
+            
+            personalKeys.forEach(key => {
+              if (answers[key] !== undefined) pageAnswers[key] = answers[key];
+            });
+          } else if (page === 3) {
+            // Value add questions
+            const valueAddKeys = [
+              'industryInterests', 'aiEthics', 'futurePlans', 'aiImpact',
+              'dataPrivacy', 'aiRegulation', 'futureAiTrends', 'aiChallenges',
+              'aiToolsUsage', 'aiEducationMethod'
+            ];
+            
+            valueAddKeys.forEach(key => {
+              if (answers[key] !== undefined) pageAnswers[key] = answers[key];
+            });
+          }
+          
+          pageData.answers = pageAnswers;
+        }
+        
+        // Save this page's data
+        await saveQuestionnaireData(pageData);
+      }
       
       setIsSubmitted(true);
       navigate('/thank-you');

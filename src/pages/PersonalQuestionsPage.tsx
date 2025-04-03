@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuestionnaire } from '@/context/QuestionnaireContext';
 import QuestionPageLayout from '@/components/QuestionPageLayout';
@@ -24,12 +23,12 @@ const PersonalQuestionsPage: React.FC = () => {
     workStyle: answers.workStyle || '',
     learningChallenges: answers.learningChallenges || '',
     timeCommitment: answers.timeCommitment || '',
-    strengths: answers.strengths || [],
+    strengths: answers.strengths || '',
     learningEnvironment: answers.learningEnvironment || '',
     learningGoals: answers.learningGoals || '',
     previousAiCourses: answers.previousAiCourses || '',
     careerAspirations: answers.careerAspirations || '',
-    learningObstacles: answers.learningObstacles || [],
+    learningObstacles: answers.learningObstacles || '',
     communicationPreference: answers.communicationPreference || '',
     feedbackPreference: answers.feedbackPreference || '',
   });
@@ -42,12 +41,12 @@ const PersonalQuestionsPage: React.FC = () => {
         workStyle: answers.workStyle || '',
         learningChallenges: answers.learningChallenges || '',
         timeCommitment: answers.timeCommitment || '',
-        strengths: answers.strengths || [],
+        strengths: answers.strengths || '',
         learningEnvironment: answers.learningEnvironment || '',
         learningGoals: answers.learningGoals || '',
         previousAiCourses: answers.previousAiCourses || '',
         careerAspirations: answers.careerAspirations || '',
-        learningObstacles: answers.learningObstacles || [],
+        learningObstacles: answers.learningObstacles || '',
         communicationPreference: answers.communicationPreference || '',
         feedbackPreference: answers.feedbackPreference || '',
       });
@@ -89,7 +88,7 @@ const PersonalQuestionsPage: React.FC = () => {
     if (!formData.motivations) {
       toast({
         title: "שדה חסר",
-        description: "אנא מלא/י את המוטיבציות שלך ללמידת AI",
+        description: "אנא בחר את המוטיבציות שלך ללמידת AI",
         variant: "destructive",
       });
       return;
@@ -108,33 +107,62 @@ const PersonalQuestionsPage: React.FC = () => {
       <div className="space-y-6">
         <div className="space-y-2">
           <Label htmlFor="motivations">מה מניע אותך ללמוד AI?</Label>
-          <Textarea 
-            id="motivations" 
-            name="motivations"
-            placeholder="תאר/י את המוטיבציות שלך..."
-            value={formData.motivations}
-            onChange={handleInputChange}
-            className="min-h-[100px]"
-          />
+          <RadioGroup 
+            value={formData.motivations} 
+            onValueChange={(value) => handleRadioChange('motivations', value)}
+            className="space-y-2"
+          >
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="career" id="motivation-career" />
+              <Label htmlFor="motivation-career">קידום קריירה ופיתוח מקצועי</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="interest" id="motivation-interest" />
+              <Label htmlFor="motivation-interest">עניין אישי וסקרנות טכנולוגית</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="business" id="motivation-business" />
+              <Label htmlFor="motivation-business">פיתוח מיזם עסקי או מוצר</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="academic" id="motivation-academic" />
+              <Label htmlFor="motivation-academic">מחקר אקדמי או לימודים מתקדמים</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="industry" id="motivation-industry" />
+              <Label htmlFor="motivation-industry">התעדכנות בחידושים בתעשייה</Label>
+            </div>
+          </RadioGroup>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="learningGoals">מהן המטרות האישיות שלך בלמידת AI?</Label>
-          <Select 
+          <RadioGroup 
             value={formData.learningGoals} 
-            onValueChange={(value) => handleSelectChange('learningGoals', value)}
+            onValueChange={(value) => handleRadioChange('learningGoals', value)}
+            className="space-y-2"
           >
-            <SelectTrigger id="learningGoals" className="w-full">
-              <SelectValue placeholder="בחר/י מתוך האפשרויות" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="career-change">מעבר קריירה לתחום ה-AI</SelectItem>
-              <SelectItem value="skill-upgrade">שדרוג כישורים מקצועיים</SelectItem>
-              <SelectItem value="startup">יזמות וסטארטאפ בתחום ה-AI</SelectItem>
-              <SelectItem value="academic">מחקר אקדמי</SelectItem>
-              <SelectItem value="hobby">תחביב והעשרה אישית</SelectItem>
-            </SelectContent>
-          </Select>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="career-change" id="goal-career-change" />
+              <Label htmlFor="goal-career-change">מעבר קריירה לתחום ה-AI</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="skill-upgrade" id="goal-skill-upgrade" />
+              <Label htmlFor="goal-skill-upgrade">שדרוג כישורים מקצועיים</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="startup" id="goal-startup" />
+              <Label htmlFor="goal-startup">יזמות וסטארטאפ בתחום ה-AI</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="academic" id="goal-academic" />
+              <Label htmlFor="goal-academic">מחקר אקדמי</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="hobby" id="goal-hobby" />
+              <Label htmlFor="goal-hobby">תחביב והעשרה אישית</Label>
+            </div>
+          </RadioGroup>
         </div>
 
         <div className="space-y-2">
@@ -169,24 +197,32 @@ const PersonalQuestionsPage: React.FC = () => {
 
         <div className="space-y-2">
           <Label htmlFor="careerAspirations">מהן השאיפות הקריירה שלך בטווח הארוך?</Label>
-          <Select 
+          <RadioGroup 
             value={formData.careerAspirations} 
-            onValueChange={(value) => handleSelectChange('careerAspirations', value)}
+            onValueChange={(value) => handleRadioChange('careerAspirations', value)}
+            className="space-y-2"
           >
-            <SelectTrigger id="careerAspirations" className="w-full">
-              <SelectValue placeholder="בחר/י מתוך האפשרויות" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ai-engineer">מהנדס/ת AI</SelectItem>
-              <SelectItem value="data-scientist">מדען/ית נתונים</SelectItem>
-              <SelectItem value="research">חוקר/ת באקדמיה או בתעשייה</SelectItem>
-              <SelectItem value="entrepreneur">יזם/ית טכנולוגי/ת</SelectItem>
-              <SelectItem value="management">ניהול צוותי AI</SelectItem>
-              <SelectItem value="consulting">ייעוץ AI</SelectItem>
-              <SelectItem value="educator">הוראה והדרכה בתחום</SelectItem>
-              <SelectItem value="current-enhancement">שיפור התפקיד הנוכחי</SelectItem>
-            </SelectContent>
-          </Select>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="ai-engineer" id="career-ai-engineer" />
+              <Label htmlFor="career-ai-engineer">מהנדס/ת AI</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="data-scientist" id="career-data-scientist" />
+              <Label htmlFor="career-data-scientist">מדען/ית נתונים</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="research" id="career-research" />
+              <Label htmlFor="career-research">חוקר/ת באקדמיה או בתעשייה</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="entrepreneur" id="career-entrepreneur" />
+              <Label htmlFor="career-entrepreneur">יזם/ית טכנולוגי/ת</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="management" id="career-management" />
+              <Label htmlFor="career-management">ניהול צוותי AI</Label>
+            </div>
+          </RadioGroup>
         </div>
 
         <div className="space-y-2">
@@ -198,184 +234,145 @@ const PersonalQuestionsPage: React.FC = () => {
           >
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <RadioGroupItem value="quiet" id="env-quiet" />
-              <Label htmlFor="env-quiet">סביבה שקטה ופרטית</Label>
+              <Label htmlFor="env-quiet">סביבה שקטה ומבודדת</Label>
             </div>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="busy" id="env-busy" />
-              <Label htmlFor="env-busy">סביבה תוססת עם אנשים</Label>
+              <RadioGroupItem value="collaborative" id="env-collaborative" />
+              <Label htmlFor="env-collaborative">סביבה שיתופית עם עמיתים</Label>
             </div>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="outdoor" id="env-outdoor" />
-              <Label htmlFor="env-outdoor">מרחבים פתוחים וטבע</Label>
+              <RadioGroupItem value="structured" id="env-structured" />
+              <Label htmlFor="env-structured">סביבה מובנית עם הנחייה ברורה</Label>
             </div>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="night" id="env-night" />
-              <Label htmlFor="env-night">בשעות הלילה המאוחרות</Label>
+              <RadioGroupItem value="flexible" id="env-flexible" />
+              <Label htmlFor="env-flexible">סביבה גמישה המאפשרת חופש</Label>
             </div>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="adaptable" id="env-adaptable" />
-              <Label htmlFor="env-adaptable">מסתגל/ת לכל סביבה</Label>
+              <RadioGroupItem value="hands-on" id="env-hands-on" />
+              <Label htmlFor="env-hands-on">סביבה מעשית עם התנסות</Label>
             </div>
           </RadioGroup>
         </div>
 
         <div className="space-y-2">
-          <Label>מהם המכשולים העיקריים ללמידה שלך? (ניתן לבחור כמה אפשרויות)</Label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
-            {[
-              { id: 'time', label: 'מגבלות זמן' },
-              { id: 'technical', label: 'פערי ידע טכני' },
-              { id: 'mathematical', label: 'קושי במתמטיקה' },
-              { id: 'focus', label: 'קושי בריכוז לאורך זמן' },
-              { id: 'motivation', label: 'שמירה על מוטיבציה' },
-              { id: 'resources', label: 'גישה למשאבים' },
-              { id: 'language', label: 'קשיי שפה' },
-              { id: 'confidence', label: 'חוסר בטחון עצמי' },
-            ].map(item => (
-              <div key={item.id} className="flex items-center space-x-2 rtl:space-x-reverse">
-                <Checkbox 
-                  id={`obstacle-${item.id}`} 
-                  checked={(formData.learningObstacles || []).includes(item.id)}
-                  onCheckedChange={(checked) => handleCheckboxChange('learningObstacles', item.id, checked === true)}
-                />
-                <Label htmlFor={`obstacle-${item.id}`}>{item.label}</Label>
-              </div>
-            ))}
-          </div>
+          <Label htmlFor="timeCommitment">כמה זמן בשבוע את/ה מוכן/ה להקדיש ללימודי AI?</Label>
+          <RadioGroup 
+            value={formData.timeCommitment} 
+            onValueChange={(value) => handleRadioChange('timeCommitment', value)}
+            className="space-y-2"
+          >
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="0-2" id="time-0-2" />
+              <Label htmlFor="time-0-2">פחות מ-2 שעות בשבוע</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="2-5" id="time-2-5" />
+              <Label htmlFor="time-2-5">2-5 שעות בשבוע</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="5-10" id="time-5-10" />
+              <Label htmlFor="time-5-10">5-10 שעות בשבוע</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="10-20" id="time-10-20" />
+              <Label htmlFor="time-10-20">10-20 שעות בשבוע</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="20+" id="time-20-plus" />
+              <Label htmlFor="time-20-plus">יותר מ-20 שעות בשבוע</Label>
+            </div>
+          </RadioGroup>
         </div>
 
         <div className="space-y-2">
-          <Label>מהם הכוחות והחוזקות שלך? (ניתן לבחור כמה אפשרויות)</Label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
-            {[
-              { id: 'analytical', label: 'חשיבה אנליטית' },
-              { id: 'creative', label: 'יצירתיות' },
-              { id: 'problem-solving', label: 'פתרון בעיות' },
-              { id: 'attention-to-detail', label: 'תשומת לב לפרטים' },
-              { id: 'persistence', label: 'התמדה' },
-              { id: 'communication', label: 'תקשורת' },
-              { id: 'fast-learning', label: 'למידה מהירה' },
-              { id: 'teamwork', label: 'עבודת צוות' },
-            ].map(item => (
-              <div key={item.id} className="flex items-center space-x-2 rtl:space-x-reverse">
-                <Checkbox 
-                  id={item.id} 
-                  checked={(formData.strengths || []).includes(item.id)}
-                  onCheckedChange={(checked) => handleCheckboxChange('strengths', item.id, checked === true)}
-                />
-                <Label htmlFor={item.id}>{item.label}</Label>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="previousAiCourses">האם למדת בעבר קורסים בתחום ה-AI או מדע הנתונים?</Label>
+          <Label htmlFor="previousAiCourses">האם השתתפת בעבר בקורסים בנושא AI?</Label>
           <RadioGroup 
             value={formData.previousAiCourses} 
             onValueChange={(value) => handleRadioChange('previousAiCourses', value)}
             className="space-y-2"
           >
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="none" id="courses-none" />
-              <Label htmlFor="courses-none">לא למדתי קורסים בתחום</Label>
+              <RadioGroupItem value="none" id="prev-none" />
+              <Label htmlFor="prev-none">לא, זה הקורס הראשון שלי</Label>
             </div>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="online-free" id="courses-online-free" />
-              <Label htmlFor="courses-online-free">קורסים מקוונים חינמיים</Label>
+              <RadioGroupItem value="one-online" id="prev-one-online" />
+              <Label htmlFor="prev-one-online">כן, קורס מקוון אחד</Label>
             </div>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="online-paid" id="courses-online-paid" />
-              <Label htmlFor="courses-online-paid">קורסים מקוונים בתשלום</Label>
+              <RadioGroupItem value="several-online" id="prev-several-online" />
+              <Label htmlFor="prev-several-online">כן, מספר קורסים מקוונים</Label>
             </div>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="academic" id="courses-academic" />
-              <Label htmlFor="courses-academic">קורסים אקדמיים</Label>
+              <RadioGroupItem value="academic" id="prev-academic" />
+              <Label htmlFor="prev-academic">כן, קורסים אקדמיים</Label>
             </div>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="bootcamp" id="courses-bootcamp" />
-              <Label htmlFor="courses-bootcamp">מחנה אימונים (bootcamp)</Label>
+              <RadioGroupItem value="professional" id="prev-professional" />
+              <Label htmlFor="prev-professional">כן, הכשרות מקצועיות</Label>
             </div>
           </RadioGroup>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="communicationPreference">איך את/ה מעדיף/ה לתקשר במהלך הקורס?</Label>
-          <Select 
-            value={formData.communicationPreference} 
-            onValueChange={(value) => handleSelectChange('communicationPreference', value)}
-          >
-            <SelectTrigger id="communicationPreference" className="w-full">
-              <SelectValue placeholder="בחר/י מתוך האפשרויות" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="email">אימייל</SelectItem>
-              <SelectItem value="forum">פורום דיונים</SelectItem>
-              <SelectItem value="chat">צ'אט קבוצתי (סלאק, דיסקורד וכו')</SelectItem>
-              <SelectItem value="video">שיחות וידאו</SelectItem>
-              <SelectItem value="in-person">פגישות פנים מול פנים</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="feedbackPreference">איזה סוג משוב את/ה מעדיף/ה לקבל?</Label>
+          <Label htmlFor="learningChallenges">מהו האתגר הגדול ביותר שלך בלמידת טכנולוגיות חדשות?</Label>
           <RadioGroup 
-            value={formData.feedbackPreference} 
-            onValueChange={(value) => handleRadioChange('feedbackPreference', value)}
+            value={formData.learningChallenges} 
+            onValueChange={(value) => handleRadioChange('learningChallenges', value)}
             className="space-y-2"
           >
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="direct" id="feedback-direct" />
-              <Label htmlFor="feedback-direct">ישיר ומפורט</Label>
+              <RadioGroupItem value="time" id="challenge-time" />
+              <Label htmlFor="challenge-time">מחסור בזמן</Label>
             </div>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="gentle" id="feedback-gentle" />
-              <Label htmlFor="feedback-gentle">עדין ותומך</Label>
+              <RadioGroupItem value="background" id="challenge-background" />
+              <Label htmlFor="challenge-background">חוסר בידע רקע מספק</Label>
             </div>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="written" id="feedback-written" />
-              <Label htmlFor="feedback-written">בכתב</Label>
+              <RadioGroupItem value="motivation" id="challenge-motivation" />
+              <Label htmlFor="challenge-motivation">שמירה על מוטיבציה לאורך זמן</Label>
             </div>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="verbal" id="feedback-verbal" />
-              <Label htmlFor="feedback-verbal">בעל פה</Label>
+              <RadioGroupItem value="practice" id="challenge-practice" />
+              <Label htmlFor="challenge-practice">מציאת הזדמנויות לתרגול מעשי</Label>
             </div>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="peer" id="feedback-peer" />
-              <Label htmlFor="feedback-peer">מעמיתים לקורס</Label>
+              <RadioGroupItem value="resources" id="challenge-resources" />
+              <Label htmlFor="challenge-resources">מציאת משאבי למידה איכותיים</Label>
             </div>
           </RadioGroup>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="learningChallenges">מהם האתגרים העיקריים שאתה צופה בלימוד AI?</Label>
-          <Textarea 
-            id="learningChallenges" 
-            name="learningChallenges"
-            placeholder="תאר/י את האתגרים שלך..."
-            value={formData.learningChallenges}
-            onChange={handleInputChange}
-            className="min-h-[80px]"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="timeCommitment">כמה זמן בשבוע את/ה יכול/ה להקדיש לקורס?</Label>
-          <Select 
-            value={formData.timeCommitment} 
-            onValueChange={(value) => handleSelectChange('timeCommitment', value)}
+          <Label htmlFor="communicationPreference">מהי העדפת התקשורת שלך?</Label>
+          <RadioGroup 
+            value={formData.communicationPreference} 
+            onValueChange={(value) => handleRadioChange('communicationPreference', value)}
+            className="space-y-2"
           >
-            <SelectTrigger id="timeCommitment" className="w-full">
-              <SelectValue placeholder="בחר/י מתוך האפשרויות" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="0-3">פחות מ-3 שעות</SelectItem>
-              <SelectItem value="3-5">3-5 שעות</SelectItem>
-              <SelectItem value="5-10">5-10 שעות</SelectItem>
-              <SelectItem value="10+">יותר מ-10 שעות</SelectItem>
-            </SelectContent>
-          </Select>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="email" id="comm-email" />
+              <Label htmlFor="comm-email">דוא"ל</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="phone" id="comm-phone" />
+              <Label htmlFor="comm-phone">שיחת טלפון</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="video" id="comm-video" />
+              <Label htmlFor="comm-video">שיחת וידאו</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="messaging" id="comm-messaging" />
+              <Label htmlFor="comm-messaging">הודעות מיידיות (WhatsApp/Telegram)</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="in-person" id="comm-in-person" />
+              <Label htmlFor="comm-in-person">מפגשים פנים אל פנים</Label>
+            </div>
+          </RadioGroup>
         </div>
       </div>
     </QuestionPageLayout>

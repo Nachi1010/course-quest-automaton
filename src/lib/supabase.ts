@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 
@@ -43,23 +42,6 @@ export async function saveQuestionnaireData(data: Partial<QuestionnaireEntry>): 
       }
     }
     
-    // Get existing entry if any (based on user_id if available)
-    let existingEntry = null;
-    
-    if (data.user_id) {
-      const { data: existingData, error: fetchError } = await supabase
-        .from('questionnaire_data')
-        .select('*')
-        .eq('user_id', data.user_id)
-        .maybeSingle();
-      
-      if (fetchError) {
-        console.error('Error fetching existing entry:', fetchError);
-        // Continue anyway - we'll try to insert
-      }
-      existingEntry = existingData;
-    }
-
     // Make sure page is always set
     if (!data.page && data.page !== 0) {
       data.page = 1; // Default to page 1 instead of throwing error
@@ -72,53 +54,29 @@ export async function saveQuestionnaireData(data: Partial<QuestionnaireEntry>): 
       throw new Error('User ID is required');
     }
 
-    if (existingEntry) {
-      // Update existing entry
-      // We don't include id in the update data
-      const updateData = {
-        ...data,
-        updated_at: new Date().toISOString()
-      };
-      
-      // Remove id from update data (it's a number in DB but might be string in our code)
-      delete updateData.id;
-      
-      const { error: updateError } = await supabase
-        .from('questionnaire_data')
-        .update(updateData)
-        .eq('id', existingEntry.id);
-      
-      if (updateError) {
-        console.error('Error updating questionnaire entry:', updateError);
-        // Continue to show the error but don't throw
-      } else {
-        console.log('Updated existing questionnaire entry');
-      }
+    // Always create a new entry for the page's data
+    // This allows multiple entries per user+page
+    const insertData = {
+      ...data,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      page: data.page, 
+      user_id: data.user_id
+    };
+    
+    // Remove any undefined id when inserting
+    if (insertData.id === undefined) {
+      delete insertData.id;
+    }
+    
+    const { error: insertError } = await supabase
+      .from('questionnaire_data')
+      .insert(insertData);
+    
+    if (insertError) {
+      console.error('Error creating questionnaire entry:', insertError);
     } else {
-      // Create new entry
-      const insertData = {
-        ...data,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        page: data.page, 
-        user_id: data.user_id
-      };
-      
-      // Remove any undefined id when inserting
-      if (insertData.id === undefined) {
-        delete insertData.id;
-      }
-      
-      const { error: insertError } = await supabase
-        .from('questionnaire_data')
-        .insert(insertData);
-      
-      if (insertError) {
-        console.error('Error creating questionnaire entry:', insertError);
-        // Continue to show the error but don't throw
-      } else {
-        console.log('Created new questionnaire entry');
-      }
+      console.log('Created new questionnaire entry for page', data.page);
     }
   } catch (error) {
     console.error('Error saving questionnaire data:', error);

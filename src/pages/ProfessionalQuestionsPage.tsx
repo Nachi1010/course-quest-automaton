@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuestionnaire } from '@/context/QuestionnaireContext';
 import QuestionPageLayout from '@/components/QuestionPageLayout';
@@ -28,10 +27,10 @@ const ProfessionalQuestionsPage: React.FC = () => {
     educationLevel: answers.educationLevel || '',
     softwareDevelopmentRoles: answers.softwareDevelopmentRoles || '',
     companySize: answers.companySize || '',
-    industryExperience: answers.industryExperience || [],
+    industryExperience: answers.industryExperience || '',
     dataScience: answers.dataScience || '',
     frameworks: answers.frameworks || '',
-    cloudPlatforms: answers.cloudPlatforms || [],
+    cloudPlatforms: answers.cloudPlatforms || '',
     aiModelsUsed: answers.aiModelsUsed || '',
   });
 
@@ -47,10 +46,10 @@ const ProfessionalQuestionsPage: React.FC = () => {
         educationLevel: answers.educationLevel || '',
         softwareDevelopmentRoles: answers.softwareDevelopmentRoles || '',
         companySize: answers.companySize || '',
-        industryExperience: answers.industryExperience || [],
+        industryExperience: answers.industryExperience || '',
         dataScience: answers.dataScience || '',
         frameworks: answers.frameworks || '',
-        cloudPlatforms: answers.cloudPlatforms || [],
+        cloudPlatforms: answers.cloudPlatforms || '',
         aiModelsUsed: answers.aiModelsUsed || '',
       });
     }
@@ -110,40 +109,62 @@ const ProfessionalQuestionsPage: React.FC = () => {
       <div className="space-y-6">
         <div className="space-y-2">
           <Label htmlFor="yearsExperience">כמה שנות ניסיון יש לך בפיתוח תוכנה?</Label>
-          <Select 
+          <RadioGroup 
             value={formData.yearsExperience} 
-            onValueChange={(value) => handleSelectChange('yearsExperience', value)}
+            onValueChange={(value) => handleRadioChange('yearsExperience', value)}
+            className="space-y-2"
           >
-            <SelectTrigger id="yearsExperience" className="w-full">
-              <SelectValue placeholder="בחר/י מתוך האפשרויות" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="0-1">פחות משנה</SelectItem>
-              <SelectItem value="1-3">1-3 שנים</SelectItem>
-              <SelectItem value="3-5">3-5 שנים</SelectItem>
-              <SelectItem value="5-10">5-10 שנים</SelectItem>
-              <SelectItem value="10+">10+ שנים</SelectItem>
-            </SelectContent>
-          </Select>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="0-1" id="years-0-1" />
+              <Label htmlFor="years-0-1">פחות משנה</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="1-3" id="years-1-3" />
+              <Label htmlFor="years-1-3">1-3 שנים</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="3-5" id="years-3-5" />
+              <Label htmlFor="years-3-5">3-5 שנים</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="5-10" id="years-5-10" />
+              <Label htmlFor="years-5-10">5-10 שנים</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="10+" id="years-10-plus" />
+              <Label htmlFor="years-10-plus">10+ שנים</Label>
+            </div>
+          </RadioGroup>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="educationLevel">מהי רמת ההשכלה הגבוהה ביותר שלך?</Label>
-          <Select 
+          <RadioGroup 
             value={formData.educationLevel} 
-            onValueChange={(value) => handleSelectChange('educationLevel', value)}
+            onValueChange={(value) => handleRadioChange('educationLevel', value)}
+            className="space-y-2"
           >
-            <SelectTrigger id="educationLevel" className="w-full">
-              <SelectValue placeholder="בחר/י מתוך האפשרויות" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="high-school">תעודת בגרות</SelectItem>
-              <SelectItem value="vocational">לימודי מקצוע / הכשרה טכנית</SelectItem>
-              <SelectItem value="bachelor">תואר ראשון</SelectItem>
-              <SelectItem value="master">תואר שני</SelectItem>
-              <SelectItem value="phd">דוקטורט</SelectItem>
-            </SelectContent>
-          </Select>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="high-school" id="edu-high-school" />
+              <Label htmlFor="edu-high-school">תעודת בגרות</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="vocational" id="edu-vocational" />
+              <Label htmlFor="edu-vocational">לימודי מקצוע / הכשרה טכנית</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="bachelor" id="edu-bachelor" />
+              <Label htmlFor="edu-bachelor">תואר ראשון</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="master" id="edu-master" />
+              <Label htmlFor="edu-master">תואר שני</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="phd" id="edu-phd" />
+              <Label htmlFor="edu-phd">דוקטורט</Label>
+            </div>
+          </RadioGroup>
         </div>
 
         <div className="space-y-2">
@@ -178,130 +199,66 @@ const ProfessionalQuestionsPage: React.FC = () => {
 
         <div className="space-y-2">
           <Label htmlFor="companySize">מהו גודל הארגון בו את/ה עובד/ת?</Label>
-          <Select 
-            value={formData.companySize} 
-            onValueChange={(value) => handleSelectChange('companySize', value)}
-          >
-            <SelectTrigger id="companySize" className="w-full">
-              <SelectValue placeholder="בחר/י מתוך האפשרויות" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="startup">סטארט-אפ (1-20 עובדים)</SelectItem>
-              <SelectItem value="small">חברה קטנה (21-100 עובדים)</SelectItem>
-              <SelectItem value="medium">חברה בינונית (101-500 עובדים)</SelectItem>
-              <SelectItem value="large">חברה גדולה (501-1000 עובדים)</SelectItem>
-              <SelectItem value="enterprise">חברת ענק (1000+ עובדים)</SelectItem>
-              <SelectItem value="freelance">עצמאי/ת</SelectItem>
-              <SelectItem value="unemployed">לא עובד/ת כרגע</SelectItem>
-              <SelectItem value="student">סטודנט/ית</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label>באילו תעשיות יש לך ניסיון? (ניתן לבחור כמה אפשרויות)</Label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
-            {[
-              { id: 'finance', label: 'פיננסים / בנקאות' },
-              { id: 'healthcare', label: 'בריאות' },
-              { id: 'retail', label: 'קמעונאות / מסחר' },
-              { id: 'education', label: 'חינוך' },
-              { id: 'government', label: 'ממשלה / ציבורי' },
-              { id: 'telecom', label: 'טלקומוניקציה' },
-              { id: 'manufacturing', label: 'תעשייה / ייצור' },
-              { id: 'tech', label: 'טכנולוגיה / היי-טק' },
-            ].map(item => (
-              <div key={item.id} className="flex items-center space-x-2 rtl:space-x-reverse">
-                <Checkbox 
-                  id={`industry-${item.id}`} 
-                  checked={(formData.industryExperience || []).includes(item.id)}
-                  onCheckedChange={(checked) => handleCheckboxChange('industryExperience', item.id, checked === true)}
-                />
-                <Label htmlFor={`industry-${item.id}`}>{item.label}</Label>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="programmingLanguages">באילו שפות תכנות את/ה משתמש/ת?</Label>
-          <Textarea 
-            id="programmingLanguages" 
-            name="programmingLanguages"
-            placeholder="Python, JavaScript, Java, etc."
-            value={formData.programmingLanguages}
-            onChange={handleInputChange}
-            className="min-h-[80px]"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="frameworks">באילו frameworks או ספריות את/ה משתמש/ת?</Label>
-          <Textarea 
-            id="frameworks" 
-            name="frameworks"
-            placeholder="React, Django, TensorFlow, PyTorch, etc."
-            value={formData.frameworks}
-            onChange={handleInputChange}
-            className="min-h-[80px]"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label>באילו פלטפורמות ענן יש לך ניסיון? (ניתן לבחור כמה אפשרויות)</Label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
-            {[
-              { id: 'aws', label: 'Amazon Web Services (AWS)' },
-              { id: 'azure', label: 'Microsoft Azure' },
-              { id: 'gcp', label: 'Google Cloud Platform (GCP)' },
-              { id: 'ibm', label: 'IBM Cloud' },
-              { id: 'oracle', label: 'Oracle Cloud' },
-              { id: 'none', label: 'אין ניסיון בענן' },
-            ].map(item => (
-              <div key={item.id} className="flex items-center space-x-2 rtl:space-x-reverse">
-                <Checkbox 
-                  id={`cloud-${item.id}`} 
-                  checked={(formData.cloudPlatforms || []).includes(item.id)}
-                  onCheckedChange={(checked) => handleCheckboxChange('cloudPlatforms', item.id, checked === true)}
-                />
-                <Label htmlFor={`cloud-${item.id}`}>{item.label}</Label>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="dataScience">מהו הניסיון שלך בData Science?</Label>
           <RadioGroup 
-            value={formData.dataScience} 
-            onValueChange={(value) => handleRadioChange('dataScience', value)}
+            value={formData.companySize} 
+            onValueChange={(value) => handleRadioChange('companySize', value)}
             className="space-y-2"
           >
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="none" id="ds-none" />
-              <Label htmlFor="ds-none">אין ניסיון</Label>
+              <RadioGroupItem value="startup" id="company-startup" />
+              <Label htmlFor="company-startup">סטארט-אפ (1-20 עובדים)</Label>
             </div>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="beginner" id="ds-beginner" />
-              <Label htmlFor="ds-beginner">מתחיל/ה - ביצעתי ניתוחים בסיסיים</Label>
+              <RadioGroupItem value="small" id="company-small" />
+              <Label htmlFor="company-small">חברה קטנה (21-100 עובדים)</Label>
             </div>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="intermediate" id="ds-intermediate" />
-              <Label htmlFor="ds-intermediate">בינוני - עבדתי עם כלי אנליזה ולמידת מכונה</Label>
+              <RadioGroupItem value="medium" id="company-medium" />
+              <Label htmlFor="company-medium">חברה בינונית (101-500 עובדים)</Label>
             </div>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="advanced" id="ds-advanced" />
-              <Label htmlFor="ds-advanced">מתקדם - פיתחתי ויישמתי מודלים</Label>
+              <RadioGroupItem value="large" id="company-large" />
+              <Label htmlFor="company-large">חברה גדולה (501-1000 עובדים)</Label>
             </div>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="expert" id="ds-expert" />
-              <Label htmlFor="ds-expert">מומחה - ניסיון נרחב וידע עמוק</Label>
+              <RadioGroupItem value="enterprise" id="company-enterprise" />
+              <Label htmlFor="company-enterprise">חברת ענק (1000+ עובדים)</Label>
             </div>
           </RadioGroup>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="aiExperience">מה הניסיון שלך עם AI?</Label>
+          <Label htmlFor="programmingLanguages">באילו שפות תכנות יש לך ניסיון?</Label>
+          <RadioGroup 
+            value={formData.programmingLanguages} 
+            onValueChange={(value) => handleRadioChange('programmingLanguages', value)}
+            className="space-y-2"
+          >
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="javascript" id="lang-js" />
+              <Label htmlFor="lang-js">JavaScript/TypeScript</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="python" id="lang-python" />
+              <Label htmlFor="lang-python">Python</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="java-csharp" id="lang-java-csharp" />
+              <Label htmlFor="lang-java-csharp">Java/C#</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="cpp" id="lang-cpp" />
+              <Label htmlFor="lang-cpp">C/C++</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="other" id="lang-other" />
+              <Label htmlFor="lang-other">שפות אחרות</Label>
+            </div>
+          </RadioGroup>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="aiExperience">מהי רמת הניסיון שלך עם AI?</Label>
           <RadioGroup 
             value={formData.aiExperience} 
             onValueChange={(value) => handleRadioChange('aiExperience', value)}
@@ -313,33 +270,21 @@ const ProfessionalQuestionsPage: React.FC = () => {
             </div>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <RadioGroupItem value="beginner" id="ai-beginner" />
-              <Label htmlFor="ai-beginner">מתחיל/ה - השתמשתי בכלי AI בסיסיים</Label>
+              <Label htmlFor="ai-beginner">מתחיל - השתמשתי בכלי AI בסיסיים</Label>
             </div>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <RadioGroupItem value="intermediate" id="ai-intermediate" />
-              <Label htmlFor="ai-intermediate">בינוני - עבדתי עם מודלים קיימים</Label>
+              <Label htmlFor="ai-intermediate">בינוני - השתמשתי במספר כלי AI ומודלים</Label>
             </div>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <RadioGroupItem value="advanced" id="ai-advanced" />
-              <Label htmlFor="ai-advanced">מתקדם - פיתחתי או אימנתי מודלים</Label>
+              <Label htmlFor="ai-advanced">מתקדם - בניתי פרויקטים עם AI</Label>
             </div>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <RadioGroupItem value="expert" id="ai-expert" />
-              <Label htmlFor="ai-expert">מומחה - ניסיון נרחב וידע עמוק</Label>
+              <Label htmlFor="ai-expert">מומחה - ניסיון נרחב בפיתוח פתרונות AI</Label>
             </div>
           </RadioGroup>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="aiModelsUsed">באילו מודלים או כלי AI השתמשת בעבר?</Label>
-          <Textarea 
-            id="aiModelsUsed" 
-            name="aiModelsUsed"
-            placeholder="GPT-3/4, BERT, DALL-E, Stable Diffusion, etc."
-            value={formData.aiModelsUsed}
-            onChange={handleInputChange}
-            className="min-h-[80px]"
-          />
         </div>
 
         <div className="space-y-2">
@@ -351,38 +296,117 @@ const ProfessionalQuestionsPage: React.FC = () => {
           >
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <RadioGroupItem value="video" id="learn-video" />
-              <Label htmlFor="learn-video">סרטוני וידאו</Label>
+              <Label htmlFor="learn-video">הרצאות וסרטוני וידאו</Label>
             </div>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <RadioGroupItem value="reading" id="learn-reading" />
-              <Label htmlFor="learn-reading">קריאת חומר</Label>
+              <Label htmlFor="learn-reading">קריאת מאמרים ותיעוד</Label>
             </div>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="practice" id="learn-practice" />
-              <Label htmlFor="learn-practice">תרגול מעשי</Label>
-            </div>
-            <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="mixed" id="learn-mixed" />
-              <Label htmlFor="learn-mixed">שילוב של האפשרויות</Label>
+              <RadioGroupItem value="hands-on" id="learn-hands-on" />
+              <Label htmlFor="learn-hands-on">תרגילים מעשיים ופרויקטים</Label>
             </div>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <RadioGroupItem value="interactive" id="learn-interactive" />
-              <Label htmlFor="learn-interactive">למידה אינטראקטיבית (סדנאות, תרגילים)</Label>
+              <Label htmlFor="learn-interactive">למידה אינטראקטיבית ותרגול</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="mentor" id="learn-mentor" />
+              <Label htmlFor="learn-mentor">הדרכה אישית וחניכה</Label>
             </div>
           </RadioGroup>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="projectGoals">מהן המטרות שלך בקורס זה? איזה פרויקט היית רוצה לפתח?</Label>
-          <Textarea 
-            id="projectGoals" 
-            name="projectGoals"
-            placeholder="תאר/י את המטרות והפרויקטים שלך..."
-            value={formData.projectGoals}
-            onChange={handleInputChange}
-            className="min-h-[120px]"
-          />
+          <Label htmlFor="projectGoals">מהי המטרה העיקרית שלך בלמידת AI?</Label>
+          <RadioGroup 
+            value={formData.projectGoals} 
+            onValueChange={(value) => handleRadioChange('projectGoals', value)}
+            className="space-y-2"
+          >
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="career" id="goal-career" />
+              <Label htmlFor="goal-career">קידום קריירה</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="project" id="goal-project" />
+              <Label htmlFor="goal-project">פיתוח פרויקט ספציפי</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="business" id="goal-business" />
+              <Label htmlFor="goal-business">פיתוח מיזם/עסק</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="academic" id="goal-academic" />
+              <Label htmlFor="goal-academic">מחקר אקדמי</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="curiosity" id="goal-curiosity" />
+              <Label htmlFor="goal-curiosity">סקרנות אישית</Label>
+            </div>
+          </RadioGroup>
         </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="industryExperience">באיזו תעשייה יש לך את הניסיון הרב ביותר?</Label>
+          <RadioGroup 
+            value={formData.industryExperience} 
+            onValueChange={(value) => handleRadioChange('industryExperience', value)}
+            className="space-y-2"
+          >
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="tech" id="industry-tech" />
+              <Label htmlFor="industry-tech">טכנולוגיה/תוכנה</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="finance" id="industry-finance" />
+              <Label htmlFor="industry-finance">פיננסים/בנקאות</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="healthcare" id="industry-healthcare" />
+              <Label htmlFor="industry-healthcare">בריאות/רפואה</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="education" id="industry-education" />
+              <Label htmlFor="industry-education">חינוך/אקדמיה</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="other" id="industry-other" />
+              <Label htmlFor="industry-other">אחר</Label>
+            </div>
+          </RadioGroup>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="dataScience">האם יש לך ניסיון במדעי הנתונים?</Label>
+          <RadioGroup 
+            value={formData.dataScience} 
+            onValueChange={(value) => handleRadioChange('dataScience', value)}
+            className="space-y-2"
+          >
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="none" id="data-none" />
+              <Label htmlFor="data-none">אין ניסיון</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="basic" id="data-basic" />
+              <Label htmlFor="data-basic">ידע בסיסי</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="intermediate" id="data-intermediate" />
+              <Label htmlFor="data-intermediate">ניסיון בינוני</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="advanced" id="data-advanced" />
+              <Label htmlFor="data-advanced">ניסיון מתקדם</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="professional" id="data-professional" />
+              <Label htmlFor="data-professional">מקצועי/מומחה</Label>
+            </div>
+          </RadioGroup>
+        </div>
+
       </div>
     </QuestionPageLayout>
   );

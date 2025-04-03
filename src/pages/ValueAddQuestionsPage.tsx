@@ -1,17 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuestionnaire } from '@/context/QuestionnaireContext';
 import QuestionPageLayout from '@/components/QuestionPageLayout';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 
 const ValueAddQuestionsPage: React.FC = () => {
@@ -48,15 +39,6 @@ const ValueAddQuestionsPage: React.FC = () => {
     }
   }, [answers]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
   const handleRadioChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -75,14 +57,32 @@ const ValueAddQuestionsPage: React.FC = () => {
       <div className="space-y-6">
         <div className="space-y-2">
           <Label htmlFor="industryInterests">באילו תעשיות או תחומים של AI את/ה מתעניין/ת במיוחד?</Label>
-          <Textarea 
-            id="industryInterests" 
-            name="industryInterests"
-            placeholder="בריאות, פיננסים, חינוך, רובוטיקה, עיבוד שפה טבעית..."
-            value={formData.industryInterests}
-            onChange={handleInputChange}
-            className="min-h-[80px]"
-          />
+          <RadioGroup 
+            value={formData.industryInterests} 
+            onValueChange={(value) => handleRadioChange('industryInterests', value)}
+            className="space-y-2"
+          >
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="healthcare" id="industry-healthcare" />
+              <Label htmlFor="industry-healthcare">בריאות ורפואה</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="finance" id="industry-finance" />
+              <Label htmlFor="industry-finance">פיננסים ובנקאות</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="education" id="industry-education" />
+              <Label htmlFor="industry-education">חינוך והדרכה</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="robotics" id="industry-robotics" />
+              <Label htmlFor="industry-robotics">רובוטיקה ואוטומציה</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="nlp" id="industry-nlp" />
+              <Label htmlFor="industry-nlp">עיבוד שפה טבעית וכלי תקשורת</Label>
+            </div>
+          </RadioGroup>
         </div>
 
         <div className="space-y-2">
@@ -117,21 +117,32 @@ const ValueAddQuestionsPage: React.FC = () => {
 
         <div className="space-y-2">
           <Label htmlFor="aiEthics">מה דעתך על הסוגיות האתיות בAI?</Label>
-          <Select 
+          <RadioGroup 
             value={formData.aiEthics} 
-            onValueChange={(value) => handleSelectChange('aiEthics', value)}
+            onValueChange={(value) => handleRadioChange('aiEthics', value)}
+            className="space-y-2"
           >
-            <SelectTrigger id="aiEthics" className="w-full">
-              <SelectValue placeholder="בחר/י את התשובה המתאימה ביותר" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="essential">חיוני לפיתוח אחראי של AI</SelectItem>
-              <SelectItem value="important">חשוב אך לא יעכב התקדמות</SelectItem>
-              <SelectItem value="somewhat-important">חשוב במידה מסוימת</SelectItem>
-              <SelectItem value="overblown">מוגזם</SelectItem>
-              <SelectItem value="not-concerned">לא מודאג/ת מסוגיות אתיות</SelectItem>
-            </SelectContent>
-          </Select>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="essential" id="ethics-essential" />
+              <Label htmlFor="ethics-essential">חיוני לפיתוח אחראי של AI</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="important" id="ethics-important" />
+              <Label htmlFor="ethics-important">חשוב אך לא יעכב התקדמות</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="somewhat-important" id="ethics-somewhat-important" />
+              <Label htmlFor="ethics-somewhat-important">חשוב במידה מסוימת</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="overblown" id="ethics-overblown" />
+              <Label htmlFor="ethics-overblown">מוגזם</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="not-concerned" id="ethics-not-concerned" />
+              <Label htmlFor="ethics-not-concerned">לא מודאג/ת מסוגיות אתיות</Label>
+            </div>
+          </RadioGroup>
         </div>
 
         <div className="space-y-2">
@@ -166,113 +177,182 @@ const ValueAddQuestionsPage: React.FC = () => {
 
         <div className="space-y-2">
           <Label htmlFor="aiRegulation">מה דעתך על רגולציה של AI?</Label>
-          <Select 
+          <RadioGroup 
             value={formData.aiRegulation} 
-            onValueChange={(value) => handleSelectChange('aiRegulation', value)}
+            onValueChange={(value) => handleRadioChange('aiRegulation', value)}
+            className="space-y-2"
           >
-            <SelectTrigger id="aiRegulation" className="w-full">
-              <SelectValue placeholder="בחר/י את התשובה המתאימה ביותר" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="strong-global">נדרשת רגולציה חזקה ברמה הגלובלית</SelectItem>
-              <SelectItem value="moderate">רגולציה מתונה בתחומים מסוימים</SelectItem>
-              <SelectItem value="self-regulation">עדיף שהתעשייה תסדיר את עצמה</SelectItem>
-              <SelectItem value="minimal">רגולציה מינימלית נדרשת</SelectItem>
-              <SelectItem value="none">אין צורך ברגולציה כלל</SelectItem>
-            </SelectContent>
-          </Select>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="strong-global" id="regulation-strong-global" />
+              <Label htmlFor="regulation-strong-global">נדרשת רגולציה חזקה ברמה הגלובלית</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="moderate" id="regulation-moderate" />
+              <Label htmlFor="regulation-moderate">רגולציה מתונה בתחומים מסוימים</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="self-regulation" id="regulation-self-regulation" />
+              <Label htmlFor="regulation-self-regulation">עדיף שהתעשייה תסדיר את עצמה</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="minimal" id="regulation-minimal" />
+              <Label htmlFor="regulation-minimal">רגולציה מינימלית נדרשת</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="none" id="regulation-none" />
+              <Label htmlFor="regulation-none">אין צורך ברגולציה כלל</Label>
+            </div>
+          </RadioGroup>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="futurePlans">איך את/ה מתכנן/ת להשתמש בידע שתרכוש/י בקורס בעתיד?</Label>
-          <Textarea 
-            id="futurePlans" 
-            name="futurePlans"
-            placeholder="תאר/י את תוכניותיך לעתיד..."
-            value={formData.futurePlans}
-            onChange={handleInputChange}
-            className="min-h-[80px]"
-          />
+          <Label htmlFor="futurePlans">איך את/ה מתכנן/ת להשתמש בידע שתרכוש/י בעתיד?</Label>
+          <RadioGroup 
+            value={formData.futurePlans} 
+            onValueChange={(value) => handleRadioChange('futurePlans', value)}
+            className="space-y-2"
+          >
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="career-advancement" id="future-career-advancement" />
+              <Label htmlFor="future-career-advancement">קידום קריירה בארגון הנוכחי</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="new-position" id="future-new-position" />
+              <Label htmlFor="future-new-position">חיפוש תפקיד חדש בתחום ה-AI</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="business" id="future-business" />
+              <Label htmlFor="future-business">יזמות ופיתוח מיזם עסקי</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="research" id="future-research" />
+              <Label htmlFor="future-research">מחקר וחקר בתחום ה-AI</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="personal-enrichment" id="future-personal-enrichment" />
+              <Label htmlFor="future-personal-enrichment">העשרה אישית ופיתוח כישורים</Label>
+            </div>
+          </RadioGroup>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="futureAiTrends">אילו מגמות AI עתידיות מעניינות אותך ביותר?</Label>
-          <Select 
+          <RadioGroup 
             value={formData.futureAiTrends} 
-            onValueChange={(value) => handleSelectChange('futureAiTrends', value)}
+            onValueChange={(value) => handleRadioChange('futureAiTrends', value)}
+            className="space-y-2"
           >
-            <SelectTrigger id="futureAiTrends" className="w-full">
-              <SelectValue placeholder="בחר/י את התשובה המתאימה ביותר" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="agi">בינה מלאכותית כללית (AGI)</SelectItem>
-              <SelectItem value="multimodal">מודלים מולטימודליים (טקסט, תמונה, קול)</SelectItem>
-              <SelectItem value="specific-ai">בינה מלאכותית מותאמת לתחומים ספציפיים</SelectItem>
-              <SelectItem value="robotics">רובוטיקה ואוטומציה</SelectItem>
-              <SelectItem value="human-ai">שיתוף פעולה אדם-מכונה</SelectItem>
-            </SelectContent>
-          </Select>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="generative-ai" id="trend-generative-ai" />
+              <Label htmlFor="trend-generative-ai">AI גנרטיבי (תמונות, טקסט, וידאו)</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="agi" id="trend-agi" />
+              <Label htmlFor="trend-agi">בינה מלאכותית כללית (AGI)</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="robotics" id="trend-robotics" />
+              <Label htmlFor="trend-robotics">רובוטיקה ואוטומציה</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="explainable-ai" id="trend-explainable-ai" />
+              <Label htmlFor="trend-explainable-ai">AI מוסבר ובר אמון</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="edge-ai" id="trend-edge-ai" />
+              <Label htmlFor="trend-edge-ai">AI בקצה (Edge AI) והתקנים חכמים</Label>
+            </div>
+          </RadioGroup>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="aiChallenges">מהו לדעתך האתגר הגדול ביותר בתחום ה-AI כיום?</Label>
+          <Label htmlFor="aiChallenges">מהו האתגר המשמעותי ביותר של טכנולוגיות AI בעיניך?</Label>
           <RadioGroup 
             value={formData.aiChallenges} 
             onValueChange={(value) => handleRadioChange('aiChallenges', value)}
             className="space-y-2"
           >
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="bias" id="challenge-bias" />
-              <Label htmlFor="challenge-bias">הטיות ואפליה במודלים</Label>
+              <RadioGroupItem value="ethics" id="challenge-ethics" />
+              <Label htmlFor="challenge-ethics">אתיקה, הוגנות ושקיפות</Label>
             </div>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="transparency" id="challenge-transparency" />
-              <Label htmlFor="challenge-transparency">שקיפות והסברתיות של מודלים</Label>
+              <RadioGroupItem value="security" id="challenge-security" />
+              <Label htmlFor="challenge-security">אבטחה ומניעת שימוש לרעה</Label>
             </div>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="safety" id="challenge-safety" />
-              <Label htmlFor="challenge-safety">בטיחות ואיומים פוטנציאליים</Label>
+              <RadioGroupItem value="job-displacement" id="challenge-job-displacement" />
+              <Label htmlFor="challenge-job-displacement">אובדן משרות ופגיעה בתעסוקה</Label>
             </div>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="accessibility" id="challenge-accessibility" />
-              <Label htmlFor="challenge-accessibility">נגישות לטכנולוגיה ופערים דיגיטליים</Label>
+              <RadioGroupItem value="concentration" id="challenge-concentration" />
+              <Label htmlFor="challenge-concentration">ריכוז כוח בידי תאגידים גדולים</Label>
             </div>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
-              <RadioGroupItem value="regulation" id="challenge-regulation" />
-              <Label htmlFor="challenge-regulation">רגולציה ומסגרות משפטיות</Label>
+              <RadioGroupItem value="technical" id="challenge-technical" />
+              <Label htmlFor="challenge-technical">מגבלות טכניות ואמינות המערכות</Label>
             </div>
           </RadioGroup>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="aiToolsUsage">באילו כלי AI את/ה משתמש/ת כיום?</Label>
-          <Textarea 
-            id="aiToolsUsage" 
-            name="aiToolsUsage"
-            placeholder="ChatGPT, Midjourney, Copilot, DALLE, וכו'..."
-            value={formData.aiToolsUsage}
-            onChange={handleInputChange}
-            className="min-h-[80px]"
-          />
+          <RadioGroup 
+            value={formData.aiToolsUsage} 
+            onValueChange={(value) => handleRadioChange('aiToolsUsage', value)}
+            className="space-y-2"
+          >
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="chatgpt" id="tool-chatgpt" />
+              <Label htmlFor="tool-chatgpt">ChatGPT ומודלי שפה</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="image-generation" id="tool-image-generation" />
+              <Label htmlFor="tool-image-generation">כלים ליצירת תמונות (DALL-E, Midjourney)</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="code-assistants" id="tool-code-assistants" />
+              <Label htmlFor="tool-code-assistants">עוזרי קוד (GitHub Copilot, Cursor)</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="productivity" id="tool-productivity" />
+              <Label htmlFor="tool-productivity">כלי פרודוקטיביות מבוססי AI</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="none" id="tool-none" />
+              <Label htmlFor="tool-none">לא משתמש/ת בכלי AI באופן קבוע</Label>
+            </div>
+          </RadioGroup>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="aiEducationMethod">מהי לדעתך הדרך הטובה ביותר ללמד AI?</Label>
-          <Select 
+          <Label htmlFor="aiEducationMethod">איך את/ה מעדיף/ה ללמוד על טכנולוגיית AI?</Label>
+          <RadioGroup 
             value={formData.aiEducationMethod} 
-            onValueChange={(value) => handleSelectChange('aiEducationMethod', value)}
+            onValueChange={(value) => handleRadioChange('aiEducationMethod', value)}
+            className="space-y-2"
           >
-            <SelectTrigger id="aiEducationMethod" className="w-full">
-              <SelectValue placeholder="בחר/י את התשובה המתאימה ביותר" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="theoretical-first">רקע תיאורטי לפני יישום מעשי</SelectItem>
-              <SelectItem value="practical-first">למידה מעשית עם פרויקטים</SelectItem>
-              <SelectItem value="mixed-approach">שילוב של תיאוריה ופרקטיקה</SelectItem>
-              <SelectItem value="specialized-tracks">מסלולים מותאמים לפי תחומי עניין</SelectItem>
-              <SelectItem value="industry-collaboration">שיתופי פעולה עם התעשייה</SelectItem>
-            </SelectContent>
-          </Select>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="structured-course" id="edu-structured-course" />
+              <Label htmlFor="edu-structured-course">קורס מובנה עם תוכנית מסודרת</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="project-based" id="edu-project-based" />
+              <Label htmlFor="edu-project-based">למידה מבוססת פרויקטים</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="self-guided" id="edu-self-guided" />
+              <Label htmlFor="edu-self-guided">למידה עצמית מחומרים מקוונים</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="mentorship" id="edu-mentorship" />
+              <Label htmlFor="edu-mentorship">חניכה אישית והדרכה מקצועית</Label>
+            </div>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <RadioGroupItem value="community" id="edu-community" />
+              <Label htmlFor="edu-community">למידה קהילתית ושיתוף ידע</Label>
+            </div>
+          </RadioGroup>
         </div>
       </div>
     </QuestionPageLayout>
